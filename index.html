@@ -1,0 +1,2414 @@
+<!DOCTYPE html>
+<html lang="tr"A class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlowSoft — Yeni Nesil Bulut Randevu, CRM & WhatsApp Otomasyon Platformu</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #07070a;
+            color: #f8fafc;
+            overflow-x: hidden;
+        }
+        /* Özel Kaydırma Çubuğu */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #07070a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #27273a;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a855f7;
+        }
+        /* Range Slider Stilleri */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 8px;
+            background: #161626;
+            border-radius: 999px;
+            outline: none;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #a855f7, #00d2ff);
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.6);
+            border: 2px solid #ffffff;
+            transition: transform 0.15s ease;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+        }
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        .animate-float {
+            animation: floatSlow 5s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-[#07070a] text-slate-100 selection:bg-purple-500 selection:text-white flex flex-col justify-between">
+
+    <!-- ARKA PLAN SİBER NEON IŞIK EFEKTLERİ -->
+    <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <div class="absolute -top-40 -left-40 w-96 h-96 bg-purple-600/15 rounded-full blur-[130px]"></div>
+        <div class="absolute top-1/4 -right-40 w-96 h-96 bg-cyan-500/15 rounded-full blur-[130px]"></div>
+        <div class="absolute bottom-0 left-1/3 w-96 h-96 bg-blue-600/10 rounded-full blur-[140px]"></div>
+    </div>
+
+    <!-- BİLDİRİM TOAST KONTEYNERİ (Sağ Üst) -->
+    <div id="toastContainer" class="fixed top-24 right-5 z-50 flex flex-col gap-2.5 max-w-sm w-[90vw] pointer-events-none"></div>
+
+    <!-- CANLI WHATSAPP BİLDİRİM POPUP (Otomasyon Çalıştığında Sağ Altta Çıkar) -->
+    <div id="whatsappPopup" class="hidden fixed bottom-5 right-5 z-50 max-w-sm w-[92vw] bg-[#0b141a] border-2 border-emerald-500/70 rounded-2xl p-4 shadow-[0_0_45px_rgba(16,185,129,0.45)] transition-all duration-300">
+        <div class="flex items-center justify-between border-b border-emerald-500/20 pb-2.5 mb-3">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-full bg-emerald-500 flex items-center justify-center text-black font-bold shadow-[0_0_15px_rgba(16,185,129,0.6)]">
+                    <i data-lucide="message-square" class="w-4 h-4"></i>
+                </div>
+                <div>
+                    <div class="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+                        <span>WhatsApp Otomasyon Asistanı</span>
+                        <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                    </div>
+                    <div id="wpSubtitle" class="text-[10px] text-slate-400">Müşteriye Anında İletildi</div>
+                </div>
+            </div>
+            <button onclick="closeWhatsappPopup()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/5">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+        </div>
+        <div class="bg-[#1f2c34] rounded-xl p-3.5 text-xs text-slate-200 space-y-1.5 leading-relaxed border border-emerald-500/10">
+            <p id="wpTitle" class="font-semibold text-emerald-300">✅ Randevu Onayı • Ahmet VIP Studio</p>
+            <p id="wpBody">
+                Sayın <strong class="text-white">Emirhan Yılmaz</strong>, <span class="text-cyan-300">VIP Saç & Sakal Tasarımı</span> randevunuz <span class="underline">Yarın saat 14:30</span> için onaylanmıştır.
+            </p>
+            <div class="flex items-center justify-between text-[10px] text-slate-400 pt-1.5 border-t border-white/5">
+                <span id="wpPhone">📞 0532 480 90 10</span>
+                <span class="text-emerald-400 font-semibold">FlowSoft Cloud • Şimdi ✓✓</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1. STICKY GLASSMORPHIC HEADER -->
+    <header class="sticky top-0 z-40 backdrop-blur-xl bg-[#07070a]/85 border-b border-purple-500/20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-8 h-20 flex items-center justify-between gap-4">
+            <!-- Kompakt SVG FlowSoft Logo -->
+            <button onclick="switchMainView('landing', true)" class="text-left focus:outline-none group">
+                <div class="inline-flex items-center gap-3 select-none">
+                    <div class="relative w-11 h-11 rounded-full p-[2px] bg-gradient-to-tr from-purple-500 via-blue-500 to-cyan-400 shadow-[0_0_20px_rgba(139,92,246,0.45)] group-hover:shadow-[0_0_28px_rgba(0,210,255,0.65)] transition-all duration-300">
+                        <div class="w-full h-full rounded-full bg-[#06060c] flex items-center justify-center">
+                            <svg viewBox="0 0 100 100" class="w-7 h-7" fill="none">
+                                <defs>
+                                    <linearGradient id="navF1" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stop-color="#e879f9" />
+                                        <stop offset="50%" stop-color="#8b5cf6" />
+                                        <stop offset="100%" stop-color="#00d2ff" />
+                                    </linearGradient>
+                                    <linearGradient id="navF2" x1="0%" y1="100%" x2="100%" y2="0%">
+                                        <stop offset="0%" stop-color="#2563eb" />
+                                        <stop offset="100%" stop-color="#22d3ee" />
+                                    </linearGradient>
+                                </defs>
+                                <path d="M 22 65 C 26 32, 40 16, 65 16 L 88 16 C 84 30, 74 38, 58 38 L 44 38 C 33 38, 26 48, 22 65 Z" fill="url(#navF1)" />
+                                <path d="M 18 82 C 23 58, 38 46, 58 46 L 78 46 C 74 58, 65 65, 52 65 L 43 65 L 37 80 C 33 88, 24 90, 18 82 Z" fill="url(#navF2)" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="flex flex-col">
+                        <div class="text-xl font-black tracking-tight leading-none flex items-center">
+                            <span class="text-white">Flow</span>
+                            <span class="bg-gradient-to-r from-purple-400 via-indigo-400 to-cyan-400 bg-clip-text text-transparent">Soft</span>
+                            <span class="ml-1.5 text-[11px] font-mono text-purple-400/90 font-bold">&lt;/&gt;</span>
+                        </div>
+                        <span class="text-[9px] font-semibold tracking-[0.22em] text-slate-400 uppercase mt-1">
+                            BUILD • AUTOMATE • GROW
+                        </span>
+                    </div>
+                </div>
+            </button>
+
+            <!-- Masaüstü Navigasyon Linkleri -->
+            <nav class="hidden xl:flex items-center gap-6 text-sm font-medium text-slate-300">
+                <button onclick="navigateToSection('solutions')" class="hover:text-purple-400 transition-colors">Çözümler</button>
+                <button onclick="navigateToSection('simulator')" class="hover:text-cyan-400 transition-colors flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+                    <span>Canlı Simülasyon</span>
+                </button>
+                <button onclick="openSimulatorTabAndScroll('pipeline')" class="hover:text-purple-400 transition-colors">Otomasyon Akışı</button>
+                <button onclick="navigateToSection('calculator')" class="hover:text-cyan-400 transition-colors">Kazanç Hesaplayıcı</button>
+                <button onclick="navigateToSection('pricing')" class="hover:text-purple-400 transition-colors">Fiyatlandırma</button>
+                <button onclick="navigateToSection('faq')" class="hover:text-cyan-400 transition-colors">SSS</button>
+            </nav>
+
+            <!-- Sağ Aksiyon Butonları -->
+            <div class="hidden sm:flex items-center gap-2.5">
+                <!-- Canlı Yönetim Paneli Butonu -->
+                <button onclick="switchMainView('dashboard')" id="navDashboardBtn" class="px-3.5 py-2.5 rounded-xl text-xs font-bold bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/20 transition-all flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                    <i data-lucide="layout-dashboard" class="w-3.5 h-3.5"></i>
+                    <span>Yönetim Paneli</span>
+                </button>
+
+                <!-- Giriş Yap Butonu / Kullanıcı Profili -->
+                <button onclick="openAuthModal('login')" id="headerAuthBtn" class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-[#11111d] border border-white/10 text-slate-200 hover:border-purple-500/50 transition-all flex items-center gap-2">
+                    <i data-lucide="user" class="w-4 h-4 text-purple-400"></i>
+                    <span id="headerAuthBtnText">Giriş Yap</span>
+                </button>
+
+                <!-- Ücretsiz Dene Butonu -->
+                <button onclick="openAuthModal('register')" class="bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 hover:from-purple-500 hover:to-cyan-400 text-white font-bold px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm shadow-[0_0_25px_rgba(139,92,246,0.45)] hover:shadow-[0_0_35px_rgba(6,182,212,0.65)] transition-all flex items-center gap-1.5">
+                    <span>Ücretsiz Dene</span>
+                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <!-- Mobil Hamburger Butonu -->
+            <button onclick="toggleMobileMenu()" class="xl:hidden p-2.5 rounded-xl bg-white/5 border border-white/10 text-slate-200 hover:text-white" aria-label="Menüyü Aç">
+                <i id="mobileMenuIcon" data-lucide="menu" class="w-6 h-6"></i>
+            </button>
+        </div>
+
+        <!-- Mobil Açılır Menü -->
+        <div id="mobileMenuDrawer" class="hidden xl:hidden bg-[#0a0a12]/95 border-b border-purple-500/20 px-6 py-5 space-y-3 backdrop-blur-2xl">
+            <button onclick="navigateToSection('solutions')" class="block w-full text-left py-2.5 text-sm font-medium text-slate-200 border-b border-white/5">✨ Çözümler &amp; Özellikler</button>
+            <button onclick="navigateToSection('simulator')" class="block w-full text-left py-2.5 text-sm font-semibold text-cyan-400 border-b border-white/5">⚡ Canlı Simülasyon (Sistemi Test Et)</button>
+            <button onclick="openSimulatorTabAndScroll('pipeline')" class="block w-full text-left py-2.5 text-sm font-medium text-slate-200 border-b border-white/5">🤖 7/24 Otomasyon Akışı</button>
+            <button onclick="navigateToSection('calculator')" class="block w-full text-left py-2.5 text-sm font-medium text-slate-200 border-b border-white/5">📈 İşletme Kazanç Hesaplayıcı</button>
+            <button onclick="navigateToSection('pricing')" class="block w-full text-left py-2.5 text-sm font-medium text-slate-200 border-b border-white/5">💎 Paketler &amp; Fiyatlandırma</button>
+            <button onclick="navigateToSection('faq')" class="block w-full text-left py-2.5 text-sm font-medium text-slate-200 border-b border-white/5">❓ Sıkça Sorulan Sorular</button>
+            <div class="pt-3 grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                <button onclick="switchMainView('dashboard'); toggleMobileMenu(false);" class="w-full py-3 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-bold text-xs flex items-center justify-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                    <span>Yönetim Panelini Aç</span>
+                </button>
+                <button onclick="openAuthModal('login'); toggleMobileMenu(false);" class="w-full py-3 rounded-xl bg-white/5 border border-white/15 text-white font-bold text-xs">
+                    Giriş Yap
+                </button>
+                <button onclick="openAuthModal('register'); toggleMobileMenu(false);" class="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-cyan-500 text-white font-bold text-xs text-center">
+                    60 Sn'de Ücretsiz Başla &lt;/&gt;
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ========================================================================= -->
+    <!-- GÖRÜNÜM A: TAM KAPSAMLI SAAS İŞLETME & YÖNETİM PANELİ (DASHBOARD VIEW)     -->
+    <!-- ========================================================================= -->
+    <section id="dashboardView" class="hidden relative z-10 max-w-7xl mx-auto w-full px-4 sm:px-8 py-8 flex-1">
+        <!-- Üst Durum & Kontrol Barı -->
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5 bg-gradient-to-r from-purple-900/30 via-[#0d0d1a] to-cyan-900/30 border border-purple-500/30 rounded-3xl p-6 sm:p-8 mb-8 shadow-2xl">
+            <div class="space-y-2">
+                <div class="flex flex-wrap items-center gap-2.5">
+                    <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-bold">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                        FLOWSOFT BULUT YÖNETİM MERKEZİ
+                    </span>
+                    <span id="dashActivePlanBadge" class="px-3 py-1 rounded-full bg-purple-500/20 border border-purple-500/40 text-purple-300 text-xs font-bold">
+                        Profesyonel Paket
+                    </span>
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-black text-white flex flex-wrap items-center gap-3">
+                    <span id="dashBusinessTitle">Ahmet VIP Studio</span>
+                    <span class="text-xs font-mono font-normal text-slate-400 bg-black/40 px-3 py-1.5 rounded-xl border border-white/10 flex items-center gap-2">
+                        <i data-lucide="globe" class="w-3.5 h-3.5 text-cyan-400"></i>
+                        <span id="dashBusinessUrl">flowsoft.com/ahmet-vip-studio</span>
+                        <button onclick="copyActiveBookingUrl()" class="text-cyan-400 hover:text-white ml-1 underline text-[11px]">Kopyala</button>
+                    </span>
+                </h1>
+                <p class="text-slate-400 text-xs sm:text-sm">
+                    Tüm randevularınızı, otomatik WhatsApp mesaj şablonlarınızı, hizmet fiyatlarınızı ve şube aboneliklerinizi buradan gerçek zamanlı yönetebilirsiniz.
+                </p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3">
+                <button onclick="openNewAppointmentModal()" class="px-4 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-cyan-500 hover:from-purple-500 hover:to-cyan-400 text-white text-xs font-bold flex items-center gap-2 shadow-lg">
+                    <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                    <span>Yeni Randevu Ekle</span>
+                </button>
+                <button onclick="switchMainView('landing')" class="px-4 py-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white text-xs font-bold flex items-center gap-2">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                    <span>Ana Vitrine Dön</span>
+                </button>
+                <button onclick="handleLogout()" id="dashLogoutBtn" class="px-3.5 py-3 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-300 text-xs font-bold flex items-center gap-1.5">
+                    <i data-lucide="log-out" class="w-4 h-4"></i>
+                    <span>Çıkış</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Dashboard Alt Sekme Menüsü -->
+        <div class="flex flex-wrap gap-2 bg-[#0b0b14] p-2 rounded-2xl border border-white/10 mb-8">
+            <button onclick="switchDashboardSubTab('overview')" id="dashTabBtn-overview" class="flex-1 sm:flex-initial px-5 py-3 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow">
+                <i data-lucide="calendar-check-2" class="w-4 h-4"></i>
+                <span>Randevular &amp; Ciro (<span id="dashCountBadge">3</span>)</span>
+            </button>
+            <button onclick="switchDashboardSubTab('tenants')" id="dashTabBtn-tenants" class="flex-1 sm:flex-initial px-5 py-3 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 text-slate-400 hover:text-white">
+                <i data-lucide="building-2" class="w-4 h-4"></i>
+                <span>Aktif İşletmeler &amp; Şubeler</span>
+            </button>
+            <button onclick="switchDashboardSubTab('whatsapp')" id="dashTabBtn-whatsapp" class="flex-1 sm:flex-initial px-5 py-3 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 text-slate-400 hover:text-white">
+                <i data-lucide="message-Square" class="w-4 h-4"></i>
+                <span>WhatsApp Bot &amp; Otomasyon</span>
+            </button>
+            <button onclick="switchDashboardSubTab('services')" id="dashTabBtn-services" class="flex-1 sm:flex-initial px-5 py-3 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 text-slate-400 hover:text-white">
+                <i data-lucide="sliders" class="w-4 h-4"></i>
+                <span>Hizmetler &amp; Çalışma Saatleri</span>
+            </button>
+        </div>
+
+        <!-- ALT SEKME 1: GENEL BAKIŞ & RANDEVULAR -->
+        <div id="dashSubTab-overview" class="space-y-8">
+            <!-- 4 KPI Kartı -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-[#0b0b14] border border-white/10 rounded-2xl p-5">
+                    <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
+                        <span>Toplam Randevu Kaydı</span>
+                        <i data-lucide="calendar" class="w-4 h-4 text-purple-400"></i>
+                    </div>
+                    <div id="kpiTotalAppointments" class="text-3xl font-black text-white">3</div>
+                    <div class="text-[11px] text-emerald-400 mt-1">● Canlı Senkronize</div>
+                </div>
+                <div class="bg-[#0b0b14] border border-white/10 rounded-2xl p-5">
+                    <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
+                        <span>Onaylanan Randevu Cirosu</span>
+                        <i data-lucide="trending-up" class="w-4 h-4 text-emerald-400"></i>
+                    </div>
+                    <div id="kpiTotalRevenue" class="text-3xl font-black text-emerald-400">7.550 ₺</div>
+                    <div class="text-[11px] text-slate-400 mt-1">İptaller hariç net tutar</div>
+                </div>
+                <div class="bg-[#0b0b14] border border-white/10 rounded-2xl p-5">
+                    <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
+                        <span>İletilen WhatsApp Mesajı</span>
+                        <i data-lucide="send" class="w-4 h-4 text-cyan-400"></i>
+                    </div>
+                    <div id="kpiWhatsappCount" class="text-3xl font-black text-cyan-400">6 İleti ✓</div>
+                    <div class="text-[11px] text-cyan-300/80 mt-1">%99.9 Otomatik İletim</div>
+                </div>
+                <div class="bg-[#0b0b14] border border-white/10 rounded-2xl p-5">
+                    <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
+                        <span>Randevuya Gelmeme (No-Show)</span>
+                        <i data-lucide="shield-check" class="w-4 h-4 text-indigo-400"></i>
+                    </div>
+                    <div class="text-3xl font-black text-purple-400">%0.4</div>
+                    <div class="text-[11px] text-slate-400 mt-1">Otomatik hatırlatıcı aktif</div>
+                </div>
+            </div>
+
+            <!-- Randevu Filtreleme ve Tablo -->
+            <div class="bg-[#0b0b14] border border-white/10 rounded-3xl p-6 space-y-5">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-white">Gelen Müşteri Randevuları</h3>
+                        <p class="text-xs text-slate-400">Randevuları onaylayabilir, iptal edebilir veya tek tıkla müşteriye WhatsApp hatırlatması gönderebilirsiniz.</p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <div class="relative">
+                            <input id="dashSearchInput" oninput="renderAllAppointmentTables()" type="text" placeholder="Müşteri veya hizmet ara..." class="bg-[#06060c] border border-white/15 rounded-xl pl-3.5 pr-4 py-2 text-xs text-white focus:outline-none focus:border-cyan-400">
+                        </div>
+                        <select id="dashStatusFilter" onchange="renderAllAppointmentTables()" class="bg-[#06060c] border border-white/15 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-400">
+                            <option value="ALL">Tüm Durumlar</option>
+                            <option value="Onaylandı">Sadece Onaylananlar</option>
+                            <option value="Bekliyor">Bekleyenler</option>
+                            <option value="İptal Edildi">İptal Edilenler</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                        <thead>
+                            <tr class="border-b border-white/10 text-slate-400">
+                                <th class="py-3 px-2">Kod</th>
+                                <th class="py-3 px-2">İşletme</th>
+                                <th class="py-3 px-2">Müşteri &amp; Telefon</th>
+                                <th class="py-3 px-2">Hizmet &amp; Ücret</th>
+                                <th class="py-3 px-2">Tarih / Saat</th>
+                                <th class="py-3 px-2">Durum</th>
+                                <th class="py-3 px-2 text-right">Aksiyonlar</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dashAppointmentsTableBody" class="divide-y divide-white/5">
+                            <!-- JS ile Doldurulur -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ALT SEKME 2: AKTİF İŞLETMELER & ŞUBELER (MULTI-TENANT) -->
+        <div id="dashSubTab-tenants" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="bg-[#0b0b14] border border-white/10 rounded-3xl p-6 space-y-4 self-start">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i data-lucide="plus-circle" class="w-5 h-5 text-cyan-400"></i>
+                    <span>Yeni İşletme / Şube Aç</span>
+                </h3>
+                <p class="text-xs text-slate-400">
+                    İşletme adını girdiğiniz anda özel randevu sayfası (<code class="text-cyan-300">flowsoft.com/isletme</code>) ve WhatsApp otomasyonu aktifleşir.
+                </p>
+                <form onsubmit="handleAddTenant(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">İşletme / Marka Adı</label>
+                        <input id="newTenantNameInput" type="text" required placeholder="Örn: Yıldız Estetik Kliniği" class="w-full bg-[#050508] border border-white/15 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-cyan-400">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Abonelik Paketi</label>
+                        <select id="newTenantPlanSelect" class="w-full bg-[#050508] border border-white/15 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-cyan-400">
+                            <option value="Başlangıç|890">Başlangıç Paketi (890 ₺/ay)</option>
+                            <option value="Profesyonel|1490" selected>Profesyonel Paket (1.490 ₺/ay)</option>
+                            <option value="Kurumsal|2990">Kurumsal Paket (2.990 ₺/ay)</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-purple-600 to-cyan-500 text-white font-bold text-xs sm:text-sm shadow-lg hover:opacity-95">
+                        Hesabı ve Özel Linki Oluştur
+                    </button>
+                </form>
+            </div>
+
+            <div class="lg:col-span-2 bg-[#0b0b14] border border-white/10 rounded-3xl p-6 overflow-x-auto">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-bold text-white">Bulut Üzerindeki Aktif İşletmeler</h3>
+                    <span id="totalMrrBadge" class="px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-300 text-xs font-bold">Toplam MRR: 6.860 ₺/ay</span>
+                </div>
+                <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                    <thead>
+                        <tr class="border-b border-white/10 text-slate-400">
+                            <th class="py-3 px-2">İşletme</th>
+                            <th class="py-3 px-2">Özel Randevu Adresi</th>
+                            <th class="py-3 px-2">Paket</th>
+                            <th class="py-3 px-2">Aylık Plan</th>
+                            <th class="py-3 px-2 text-right">İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tenantsTableBody" class="divide-y divide-white/5">
+                        <!-- JS ile doldurulur -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ALT SEKME 3: WHATSAPP BOT & OTOMASYON AYARLARI -->
+        <div id="dashSubTab-whatsapp" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div class="lg:col-span-6 bg-[#0b0b14] border border-white/10 rounded-3xl p-6 space-y-5">
+                <div class="flex items-center justify-between border-b border-white/10 pb-4">
+                    <div>
+                        <span class="text-xs font-bold uppercase text-emerald-400">Otonom İletişim Kuralları</span>
+                        <h3 class="text-xl font-black text-white mt-0.5">7/24 WhatsApp &amp; SMS Tetikleyicileri</h3>
+                    </div>
+                    <span class="px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-300 text-xs font-bold">Bağlı ✓</span>
+                </div>
+
+                <div class="space-y-3.5">
+                    <label class="flex items-center justify-between p-4 rounded-2xl bg-[#06060c] border border-white/10 cursor-pointer hover:border-purple-500/40">
+                        <div>
+                            <div class="text-sm font-bold text-white">Anında Randevu Onay Mesajı</div>
+                            <div class="text-xs text-slate-400">Müşteri form doldurduğu saniyede onay mesajı gider.</div>
+                        </div>
+                        <input type="checkbox" checked onchange="showToast('WhatsApp onay kuralı güncellendi.')" class="w-5 h-5 accent-emerald-500">
+                    </label>
+
+                    <label class="flex items-center justify-between p-4 rounded-2xl bg-[#06060c] border border-white/10 cursor-pointer hover:border-purple-500/40">
+                        <div>
+                            <div class="text-sm font-bold text-white">Randevuya 2 Saat Kala Hatırlatma</div>
+                            <div class="text-xs text-slate-400">Unutulan randevuları (No-Show) %95 oranında engeller.</div>
+                        </div>
+                        <input type="checkbox" checked onchange="showToast('2 saat kala hatırlatma kuralı güncellendi.')" class="w-5 h-5 accent-emerald-500">
+                    </label>
+
+                    <label class="flex items-center justify-between p-4 rounded-2xl bg-[#06060c] border border-white/10 cursor-pointer hover:border-purple-500/40">
+                        <div>
+                            <div class="text-sm font-bold text-white">Otomatik Harita &amp; Konum Gönderimi</div>
+                            <div class="text-xs text-slate-400">Onay mesajının altına işletmenizin Google Maps konumunu ekler.</div>
+                        </div>
+                        <input type="checkbox" checked onchange="showToast('Otomatik konum gönderimi güncellendi.')" class="w-5 h-5 accent-emerald-500">
+                    </label>
+
+                    <label class="flex items-center justify-between p-4 rounded-2xl bg-[#06060c] border border-white/10 cursor-pointer hover:border-purple-500/40">
+                        <div>
+                            <div class="text-sm font-bold text-white">Hizmet Sonrası Google Yorum İsteği</div>
+                            <div class="text-xs text-slate-400">Randevudan 3 saat sonra memnuniyet ve 5 yıldız puan linki gönderir.</div>
+                        </div>
+                        <input type="checkbox" onchange="showToast('Google Yorum otomasyonu güncellendi.')" class="w-5 h-5 accent-emerald-500">
+                    </label>
+                </div>
+            </div>
+
+            <div class="lg:col-span-6 bg-[#0b0b14] border border-emerald-500/30 rounded-3xl p-6 space-y-5">
+                <div>
+                    <span class="text-xs font-bold uppercase text-cyan-400">Canlı Mesaj Şablonu Düzenleyici</span>
+                    <h3 class="text-xl font-black text-white mt-0.5">Müşteriye Giden WhatsApp Metni</h3>
+                </div>
+
+                <div class="flex flex-wrap gap-1.5 text-xs">
+                    <span class="text-slate-400 py-1 mr-1">Değişken Ekle:</span>
+                    <button type="button" onclick="insertTemplateVar('{musteri_adi}')" class="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-cyan-300 font-mono">{musteri_adi}</button>
+                    <button type="button" onclick="insertTemplateVar('{isletme_adi}')" class="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-purple-300 font-mono">{isletme_adi}</button>
+                    <button type="button" onclick="insertTemplateVar('{hizmet}')" class="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-emerald-300 font-mono">{hizmet}</button>
+                    <button type="button" onclick="insertTemplateVar('{tarih_saat}')" class="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-amber-300 font-mono">{tarih_saat}</button>
+                </div>
+
+                <textarea id="whatsappTemplateInput" rows="4" class="w-full bg-[#06060c] border border-white/15 rounded-2xl p-4 text-xs sm:text-sm text-slate-100 focus:outline-none focus:border-emerald-400 leading-relaxed">Merhaba {musteri_adi} 👋, {isletme_adi} bünyesindeki {hizmet} randevunuz {tarih_saat} için başarıyla onaylanmıştır. Sizi ağırlamaktan mutluluk duyacağız!</textarea>
+
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <button onclick="triggerCustomTemplatePreview()" class="flex-1 py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-black font-black text-xs sm:text-sm shadow-lg flex items-center justify-center gap-2">
+                        <i data-lucide="send" class="w-4 h-4"></i>
+                        <span>Canlı WhatsApp Test Mesajı Gönder</span>
+                    </button>
+                    <button onclick="showToast('Mesaj şablonunuz buluta kaydedildi!')" class="px-5 py-3.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-bold text-xs sm:text-sm">
+                        Şablonu Kaydet
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ALT SEKME 4: HİZMETLER & ÇALIŞMA SAATLERİ -->
+        <div id="dashSubTab-services" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div class="lg:col-span-5 bg-[#0b0b14] border border-white/10 rounded-3xl p-6 space-y-4 self-start">
+                <h3 class="text-lg font-bold text-white">Yeni Hizmet / İşlem Tanımla</h3>
+                <p class="text-xs text-slate-400">Buradan eklediğiniz hizmetler anında müşteri randevu sayfanızda görünür.</p>
+                <form onsubmit="handleAddService(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Hizmet Adı</label>
+                        <input id="newServiceTitle" type="text" required placeholder="Örn: Gold Cilt Bakımı" class="w-full bg-[#050508] border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-400">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1">Süre (Dakika)</label>
+                            <input id="newServiceDuration" type="text" required placeholder="Örn: 45 dk" class="w-full bg-[#050508] border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-400">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1">Ücret (₺)</label>
+                            <input id="newServicePrice" type="number" required placeholder="Örn: 850" class="w-full bg-[#050508] border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-400">
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-purple-600 to-cyan-500 text-white font-bold text-xs sm:text-sm">
+                        + Hizmeti Listeye Ekle
+                    </button>
+                </form>
+            </div>
+
+            <div class="lg:col-span-7 bg-[#0b0b14] border border-white/10 rounded-3xl p-6 space-y-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-bold text-white">Aktif Hizmet ve Fiyat Listesi</h3>
+                    <span class="text-xs text-cyan-400 font-semibold">Müşteri Sayfasında Yayında</span>
+                </div>
+                <div id="dashServicesList" class="space-y-3">
+                    <!-- JS ile doldurulur -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- GÖRÜNÜM B: ANA VİTRİN (LANDING PAGE VIEW)                                 -->
+    <!-- ========================================================================= -->
+    <main id="landingView" class="relative z-10 flex-1">
+
+        <!-- 2. HERO SECTION (KURUMSAL VİTRİN & ÖZEL FLOWSOFT 400x400 ROZETİ) -->
+        <section class="pt-10 pb-20 sm:pt-16 sm:pb-28 px-4 sm:px-8 max-w-7xl mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                <div class="lg:col-span-7 text-center lg:text-left">
+                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-bold tracking-wider uppercase mb-6 shadow-[0_0_20px_rgba(168,85,247,0.2)]">
+                        <i data-lucide="sparkles" class="w-3.5 h-3.5 text-cyan-400"></i>
+                        <span>Yeni Nesil Bulut Randevu &amp; Otomasyon Platformu</span>
+                    </div>
+
+                    <h1 class="text-4xl sm:text-6xl font-black tracking-tight leading-[1.12] text-white mb-6">
+                        İşletmenizi Otonom
+                        <span class="bg-gradient-to-r from-purple-400 via-indigo-400 to-cyan-400 bg-clip-text text-transparent">
+                            SaaS Sistemleriyle
+                        </span>
+                        Geleceğe Taşıyın
+                    </h1>
+
+                    <p class="text-slate-300 text-base sm:text-lg leading-relaxed max-w-2xl mx-auto lg:mx-0 mb-8">
+                        Kuaförler, klinikler, güzellik merkezleri, oto bakım stüdyoları ve kurumsal firmalar için telefon trafiğini bitiren,
+                        <strong class="text-white">7/24 online randevu</strong> alan ve müşterilerinize
+                        <strong class="text-cyan-300">otomatik WhatsApp bildirimleri</strong> gönderen hepsi-bir-arada iş yönetim platformu.
+                    </p>
+
+                    <!-- Hızlı Randevu Sayfası Oluşturucu Bar -->
+                    <div class="max-w-xl mx-auto lg:mx-0 mb-8 bg-[#0b0b14]/90 border border-purple-500/30 rounded-2xl p-3 shadow-2xl">
+                        <div class="flex flex-col sm:flex-row gap-2.5">
+                            <input id="heroQuickBusinessInput" type="text" placeholder="İşletme adınızı yazın (Örn: Maya Kuaför)" class="flex-1 bg-black/60 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400">
+                            <button onclick="handleHeroQuickGenerate()" class="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-cyan-500 hover:from-purple-500 hover:to-cyan-400 text-white font-extrabold text-sm transition-all flex items-center justify-center gap-2 shadow-lg shrink-0">
+                                <span>Sayfamı Oluştur</span>
+                                <i data-lucide="zap" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3.5">
+                        <button onclick="openAuthModal('register')" class="w-full sm:w-auto px-7 py-4 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 hover:from-purple-500 hover:to-cyan-400 text-white font-extrabold text-sm sm:text-base shadow-[0_0_30px_rgba(139,92,246,0.45)] hover:scale-[1.02] transition-all flex items-center justify-center gap-2.5">
+                            <span>Hemen Hesap Oluştur</span>
+                            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </button>
+
+                        <button onclick="navigateToSection('simulator')" class="w-full sm:w-auto px-6 py-4 rounded-2xl bg-[#0e0e1a] hover:bg-[#161628] border border-purple-500/30 text-slate-200 font-bold text-sm sm:text-base transition-all flex items-center justify-center gap-2">
+                            <i data-lucide="play" class="w-4 h-4 text-cyan-400"></i>
+                            <span>Canlı Sistemi Test Et</span>
+                        </button>
+
+                        <button onclick="switchMainView('dashboard')" class="w-full sm:w-auto px-6 py-4 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 font-bold text-sm sm:text-base transition-all flex items-center justify-center gap-2">
+                            <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                            <span>Yönetim Panelini Aç</span>
+                        </button>
+                    </div>
+
+                    <!-- Canlı Platform Güven Metrikleri -->
+                    <div class="mt-10 pt-8 border-t border-white/10 grid grid-cols-3 gap-4 max-w-lg mx-auto lg:mx-0">
+                        <div>
+                            <div class="text-xl sm:text-2xl font-black text-white">1.250+</div>
+                            <div class="text-xs text-slate-400">Aktif İşletme</div>
+                        </div>
+                        <div>
+                            <div class="text-xl sm:text-2xl font-black text-cyan-400">480.000+</div>
+                            <div class="text-xs text-slate-400">Otomatik Randevu</div>
+                        </div>
+                        <div>
+                            <div class="text-xl sm:text-2xl font-black text-purple-400">%99.9</div>
+                            <div class="text-xs text-slate-400">Kesintisiz Çalışma</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sağ Sütun: FlowSoft Özel 400x400 Neon SVG Rozeti -->
+                <div class="lg:col-span-5 flex flex-col items-center justify-center">
+                    <div class="relative p-6 rounded-3xl bg-gradient-to-b from-white/[0.04] to-transparent border border-white/10 backdrop-blur-xl shadow-2xl flex flex-col items-center animate-float">
+                        <div class="relative inline-flex items-center justify-center select-none">
+                            <div class="absolute -inset-4 rounded-full bg-gradient-to-tr from-purple-600/30 via-blue-500/25 to-cyan-400/30 blur-2xl animate-pulse pointer-events-none"></div>
+                            <svg viewBox="0 0 400 400" class="w-full h-full max-w-[300px] sm:max-w-[320px] max-h-[320px] drop-shadow-[0_0_35px_rgba(139,92,246,0.45)]" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <defs>
+                                    <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stop-color="#a855f7" />
+                                        <stop offset="35%" stop-color="#3b82f6" />
+                                        <stop offset="70%" stop-color="#00d2ff" />
+                                        <stop offset="100%" stop-color="#9333ea" />
+                                    </linearGradient>
+                                    <linearGradient id="fTopGrad" x1="15%" y1="0%" x2="95%" y2="90%">
+                                        <stop offset="0%" stop-color="#e879f9" />
+                                        <stop offset="45%" stop-color="#7c3aed" />
+                                        <stop offset="100%" stop-color="#00d2ff" />
+                                    </linearGradient>
+                                    <linearGradient id="fBottomGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+                                        <stop offset="0%" stop-color="#2563eb" />
+                                        <stop offset="50%" stop-color="#3b82f6" />
+                                        <stop offset="100%" stop-color="#22d3ee" />
+                                    </linearGradient>
+                                    <linearGradient id="softTextGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" stop-color="#9333ea" />
+                                        <stop offset="55%" stop-color="#6366f1" />
+                                        <stop offset="100%" stop-color="#38bdf8" />
+                                    </linearGradient>
+                                    <linearGradient id="waveGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stop-color="#7c3aed" stop-opacity="0.28" />
+                                        <stop offset="100%" stop-color="#00d2ff" stop-opacity="0.03" />
+                                    </linearGradient>
+                                    <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+                                        <feGaussianBlur stdDeviation="4" result="blur" />
+                                        <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                                    </filter>
+                                </defs>
+                                <circle cx="200" cy="200" r="186" fill="#05050a" />
+                                <path d="M 45 100 C 90 30, 160 95, 115 155 C 75 210, 20 190, 45 100 Z" fill="url(#waveGrad)" />
+                                <path d="M 355 290 C 310 365, 235 310, 285 245 C 325 190, 380 215, 355 290 Z" fill="url(#waveGrad)" />
+                                <circle cx="200" cy="200" r="186" stroke="url(#ringGrad)" stroke-width="5" filter="url(#neonGlow)" />
+                                <circle cx="200" cy="200" r="180" stroke="url(#ringGrad)" stroke-width="1" stroke-opacity="0.35" />
+                                <path d="M 136 196 C 142 135, 165 95, 212 95 L 288 95 C 282 122, 265 138, 236 138 L 184 138 C 162 138, 146 158, 136 196 Z" fill="url(#fTopGrad)" />
+                                <path d="M 130 222 C 138 178, 166 152, 206 152 L 260 152 C 254 176, 238 190, 212 190 L 184 190 L 173 215 C 166 232, 148 238, 130 222 Z" fill="url(#fBottomGrad)" />
+                                <text x="200" y="272" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-weight="900" font-size="46" letter-spacing="-1">
+                                    <tspan fill="#ffffff">Flow</tspan><tspan fill="url(#softTextGrad)">Soft</tspan>
+                                </text>
+                                <text x="204" y="305" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-weight="600" font-size="11.5" fill="#cbd5e1" letter-spacing="4.5">
+                                    BUILD <tspan fill="#a855f7">•</tspan> AUTOMATE <tspan fill="#00d2ff">•</tspan> GROW
+                                </text>
+                                <line x1="105" y1="334" x2="170" y2="334" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" />
+                                <text x="200" y="340" text-anchor="middle" font-family="monospace" font-weight="800" font-size="20" fill="#8b5cf6">&lt;/&gt;</text>
+                                <line x1="230" y1="334" x2="295" y2="334" stroke="#00d2ff" stroke-width="2" stroke-linecap="round" />
+                            </svg>
+                        </div>
+
+                        <div class="mt-4 flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#090912] border border-cyan-500/30 text-[11px] font-mono text-cyan-300">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                            <span>FlowSoft Cloud • 7/24 Aktif Otomasyon</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. CORE SOLUTIONS / ÇÖZÜMLER GRİDİ -->
+        <section id="solutions" class="py-16 sm:py-24 px-4 sm:px-8 max-w-7xl mx-auto">
+            <div class="text-center max-w-3xl mx-auto mb-14">
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-bold uppercase mb-3">
+                    <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+                    <span>Uçtan Uca Dijital Dönüşüm</span>
+                </div>
+                <h2 class="text-3xl sm:text-5xl font-black text-white tracking-tight">
+                    İşletmenizi Büyüten
+                    <span class="bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
+                        Otonom Çözümler
+                    </span>
+                </h2>
+                <p class="text-slate-400 text-sm sm:text-base mt-3">
+                    Randevu defterlerini ve bitmeyen telefon görüşmelerini geride bırakın; tüm süreçlerinizi tek bir akıllı bulut panelinden yönetin.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+                <!-- Çözüm 1 -->
+                <div class="group bg-[#0b0b14]/90 border border-white/10 hover:border-purple-500/50 rounded-3xl p-7 sm:p-9 transition-all duration-300 hover:-translate-y-1 shadow-2xl flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between gap-2 mb-5">
+                            <span class="px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-purple-500 to-indigo-500 text-white">7/24 Online Rezervasyon</span>
+                            <span class="text-xs font-mono font-bold text-cyan-400">%85 Daha Az Telefon Trafiği</span>
+                        </div>
+                        <h3 class="text-xl sm:text-2xl font-black text-white mb-3 group-hover:text-cyan-300 transition-colors">Bulut Randevu &amp; Müşteri Yönetim Paneli</h3>
+                        <p class="text-slate-400 text-sm sm:text-base leading-relaxed">
+                            Telefon trafiğini tamamen bitirin. Müşterileriniz size özel linkten saniyeler içinde randevu alsın, tüm takviminiz tek ekranda otomatik güncellensin.
+                        </p>
+                    </div>
+                    <div class="mt-6 pt-5 border-t border-white/5 flex items-center justify-between text-xs font-bold text-purple-300">
+                        <span>Tüm Paketlerde Standart</span>
+                        <button onclick="navigateToSection('simulator')" class="text-cyan-400 hover:underline flex items-center gap-1">
+                            <span>Canlı Dene</span>
+                            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Çözüm 2 -->
+                <div class="group bg-[#0b0b14]/90 border border-white/10 hover:border-cyan-500/50 rounded-3xl p-7 sm:p-9 transition-all duration-300 hover:-translate-y-1 shadow-2xl flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between gap-2 mb-5">
+                            <span class="px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-cyan-400 to-blue-500 text-black">Sıfır Unutulan Randevu</span>
+                            <span class="text-xs font-mono font-bold text-cyan-400">%99.9 Otomatik İletim Hızı</span>
+                        </div>
+                        <h3 class="text-xl sm:text-2xl font-black text-white mb-3 group-hover:text-cyan-300 transition-colors">7/24 WhatsApp &amp; SMS Otomasyon Asistanı</h3>
+                        <p class="text-slate-400 text-sm sm:text-base leading-relaxed">
+                            Randevu alındığı anda onay mesajı, randevuya 2 saat kala otomatik konum ve hatırlatma bildirimi göndererek randevuya gelmeme (No-Show) oranını sıfırlayın.
+                        </p>
+                    </div>
+                    <div class="mt-6 pt-5 border-t border-white/5 flex items-center justify-between text-xs font-bold text-purple-300">
+                        <span>Otonom Bildirim Motoru</span>
+                        <button onclick="openSimulatorTabAndScroll('pipeline')" class="text-cyan-400 hover:underline flex items-center gap-1">
+                            <span>Otomasyonu Gör</span>
+                            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Çözüm 3 -->
+                <div class="group bg-[#0b0b14]/90 border border-white/10 hover:border-emerald-500/50 rounded-3xl p-7 sm:p-9 transition-all duration-300 hover:-translate-y-1 shadow-2xl flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between gap-2 mb-5">
+                            <span class="px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-emerald-400 to-teal-500 text-black">Prestijli Dijital Kimlik</span>
+                            <span class="text-xs font-mono font-bold text-cyan-400">60 Saniyede Anında Kurulum</span>
+                        </div>
+                        <h3 class="text-xl sm:text-2xl font-black text-white mb-3 group-hover:text-cyan-300 transition-colors">Kurumsal Özel Web &amp; Portföy Sayfası</h3>
+                        <p class="text-slate-400 text-sm sm:text-base leading-relaxed">
+                            Kayıt olduğunuz saniyede işletmenize özel (flowsoft.com/isletmeniz) veya kendi alan adınızla çalışan, mobil uyumlu ve ultra hızlı randevu vitrininiz hazır olur.
+                        </p>
+                    </div>
+                    <div class="mt-6 pt-5 border-t border-white/5 flex items-center justify-between text-xs font-bold text-purple-300">
+                        <span>Instagram Biyografi Uyumlu</span>
+                        <button onclick="navigateToSection('simulator')" class="text-cyan-400 hover:underline flex items-center gap-1">
+                            <span>Linkini Oluştur</span>
+                            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Çözüm 4 -->
+                <div class="group bg-[#0b0b14]/90 border border-white/10 hover:border-purple-500/50 rounded-3xl p-7 sm:p-9 transition-all duration-300 hover:-translate-y-1 shadow-2xl flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between gap-2 mb-5">
+                            <span class="px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white">Finans &amp; Ekip Kontrolü</span>
+                            <span class="text-xs font-mono font-bold text-cyan-400">Gerçek Zamanlı Bulut Raporlama</span>
+                        </div>
+                        <h3 class="text-xl sm:text-2xl font-black text-white mb-3 group-hover:text-cyan-300 transition-colors">Gelir, Analitik ve Personel Takibi</h3>
+                        <p class="text-slate-400 text-sm sm:text-base leading-relaxed">
+                            Hangi personelinizin kaç işlem yaptığını, günlük/aylık cironuzu, en çok tercih edilen hizmetlerinizi ve sadık müşterilerinizi canlı grafiklerle takip edin.
+                        </p>
+                    </div>
+                    <div class="mt-6 pt-5 border-t border-white/5 flex items-center justify-between text-xs font-bold text-purple-300">
+                        <span>Tam Kapsamlı CRM</span>
+                        <button onclick="switchMainView('dashboard')" class="text-cyan-400 hover:underline flex items-center gap-1">
+                            <span>Yönetim Paneline Git</span>
+                            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. İNTERAKTİF CANLI SİSTEM DENEYİMİ (MULTI-TENANT SİMÜLATÖR) -->
+        <section id="simulator" class="py-16 sm:py-24 px-4 sm:px-8 max-w-7xl mx-auto">
+            <div class="text-center max-w-3xl mx-auto mb-12">
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-bold uppercase mb-3">
+                    <i data-lucide="zap" class="w-3.5 h-3.5"></i>
+                    <span>Canlı Sistem Deneyimi</span>
+                </div>
+                <h2 class="text-3xl sm:text-5xl font-black text-white tracking-tight">
+                    FlowSoft’u Kendi İşletmeniz İçin
+                    <span class="text-cyan-400">Şimdi Test Edin</span>
+                </h2>
+                <p class="text-slate-400 text-sm sm:text-base mt-3 leading-relaxed">
+                    İşletmenizin adını yazarak size özel randevu linkinizi oluşturun, örnek bir randevu girin ve otomatik WhatsApp bildirimi ile canlı yönetim panelini anında deneyimleyin.
+                </p>
+            </div>
+
+            <div class="bg-[#0b0b14] border border-purple-500/30 rounded-3xl p-5 sm:p-8 shadow-[0_0_50px_rgba(139,92,246,0.12)]">
+                <!-- İşletme Özelleştirici ve Özel Link Önizlemesi -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center pb-6 border-b border-white/10">
+                    <div class="lg:col-span-5 space-y-2">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-purple-300">
+                            1. Sektör Şablonu Seçin:
+                        </label>
+                        <div id="presetButtonsContainer" class="flex flex-wrap gap-2">
+                            <!-- JS ile doldurulur -->
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-3">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+                            2. Kendi İşletme Adınızı Yazın:
+                        </label>
+                        <input id="simCustomBusinessInput" oninput="handleCustomBusinessNameInput(this.value)" type="text" value="Ahmet VIP Studio" placeholder="Örn: Ahmet VIP Studio" class="w-full bg-[#06060c] border border-cyan-500/40 rounded-xl px-3.5 py-2.5 text-sm text-white font-semibold focus:outline-none focus:border-cyan-400">
+                    </div>
+
+                    <div class="lg:col-span-4">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-emerald-400 mb-1.5">
+                            3. Size Özel Anında Hazır Randevu Linkiniz:
+                        </label>
+                        <div class="flex items-center justify-between gap-2 bg-[#050508] border border-emerald-500/40 rounded-xl px-3.5 py-2.5 font-mono text-xs">
+                            <div class="flex items-center gap-1.5 truncate">
+                                <i data-lucide="globe" class="w-4 h-4 text-emerald-400 shrink-0"></i>
+                                <span class="text-slate-400">flowsoft.com/</span>
+                                <span id="simGeneratedSlug" class="text-emerald-300 font-bold truncate">ahmet-vip-studio</span>
+                            </div>
+                            <button onclick="copyActiveBookingUrl()" class="px-2.5 py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 font-sans font-bold text-[11px] shrink-0">
+                                Kopyala
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Simülatör Sekmeleri -->
+                <div class="flex flex-wrap items-center justify-between gap-3 my-6">
+                    <div class="flex flex-wrap gap-2 bg-[#06060c] p-1.5 rounded-2xl border border-white/10 w-full sm:w-auto">
+                        <button onclick="switchSimulatorTab('booking')" id="simTabBtn-booking" class="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow">
+                            <i data-lucide="smartphone" class="w-4 h-4"></i>
+                            <span>Müşteri Randevu Sayfası</span>
+                        </button>
+
+                        <button onclick="switchSimulatorTab('database')" id="simTabBtn-database" class="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 text-slate-400 hover:text-white">
+                            <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+                            <span>İşletme Yönetim Paneli (<span id="simAppointmentsCount">3</span>)</span>
+                        </button>
+
+                        <button onclick="switchSimulatorTab('pipeline')" id="simTabBtn-pipeline" class="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 text-slate-400 hover:text-white">
+                            <i data-lucide="bot" class="w-4 h-4"></i>
+                            <span>Canlı Otomasyon Akışı</span>
+                        </button>
+                    </div>
+
+                    <button onclick="switchMainView('dashboard')" class="text-xs font-bold text-cyan-400 hover:underline flex items-center gap-1">
+                        <span>Tam Ekran Yönetim Paneline Geç</span>
+                        <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                    </button>
+                </div>
+
+                <!-- SİMÜLATÖR SEKME 1: MÜŞTERİ RANDEVU SAYFASI -->
+                <div id="simTabContent-booking" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start bg-[#07070e] border border-white/10 rounded-2xl p-5 sm:p-8">
+                    <div class="lg:col-span-7 space-y-6">
+                        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-4">
+                            <div>
+                                <span id="simPresetCategory" class="text-[11px] uppercase tracking-widest text-cyan-400 font-bold">
+                                    Erkek Kuaförü &amp; Bakım
+                                </span>
+                                <h3 id="simPreviewBusinessTitle" class="text-2xl font-black text-white mt-0.5">
+                                    Ahmet VIP Studio
+                                </h3>
+                                <p class="text-xs text-slate-400 mt-1">
+                                    Müşterilerinizin Instagram biyografinizdeki linke tıkladığında gördüğü hızlı randevu ekranı
+                                </p>
+                            </div>
+                            <div class="px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-bold">
+                                ● 7/24 Randevuya Açık
+                            </div>
+                        </div>
+
+                        <form onsubmit="handleSimulatorBookingSubmit(event)" class="space-y-5">
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2.5">
+                                    Hizmet Seçin
+                                </label>
+                                <div id="simServicesGrid" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                    <!-- JS ile doldurulur -->
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">
+                                        Randevu Günü
+                                    </label>
+                                    <div id="simDateButtons" class="grid grid-cols-3 gap-2">
+                                        <!-- JS ile doldurulur -->
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">
+                                        Randevu Saati
+                                    </label>
+                                    <div id="simTimeButtons" class="grid grid-cols-3 gap-2">
+                                        <!-- JS ile doldurulur -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">
+                                        Adınız Soyadınız
+                                    </label>
+                                    <input id="simCustomerName" type="text" required value="Emirhan Yılmaz" class="w-full bg-[#0d0d18] border border-white/15 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-purple-400">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">
+                                        WhatsApp Numaranız
+                                    </label>
+                                    <input id="simCustomerPhone" type="text" required value="0532 480 90 10" class="w-full bg-[#0d0d18] border border-white/15 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-purple-400">
+                                </div>
+                            </div>
+
+                            <button type="submit" class="w-full py-4 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 hover:from-purple-500 hover:to-cyan-400 text-white font-black text-sm sm:text-base shadow-[0_0_25px_rgba(6,182,212,0.35)] transition-all flex items-center justify-center gap-2">
+                                <i data-lucide="zap" class="w-5 h-5"></i>
+                                <span>Test Randevusu Oluştur &amp; WhatsApp Onayını Gör</span>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Sağ Bilgi Kutusu -->
+                    <div class="lg:col-span-5 bg-[#0b0b16] border border-purple-500/25 rounded-2xl p-6 space-y-4">
+                        <div class="inline-flex items-center gap-2 text-xs font-bold text-purple-400 uppercase">
+                            <i data-lucide="sparkles" class="w-4 h-4"></i>
+                            <span>Müşteriniz Randevu Aldığında Ne Olur?</span>
+                        </div>
+                        <h4 class="text-lg font-extrabold text-white">
+                            Saniyeler İçinde Tam Otomatik Süreç
+                        </h4>
+                        <ul class="space-y-3.5 text-xs text-slate-300 pt-1">
+                            <li class="flex items-start gap-2.5">
+                                <span class="w-5 h-5 rounded-full bg-purple-500/20 text-purple-300 font-bold flex items-center justify-center shrink-0 mt-0.5">1</span>
+                                <span>Müşteriniz özel bağlantınızdan uygun saati seçip randevusunu onaylar.</span>
+                            </li>
+                            <li class="flex items-start gap-2.5">
+                                <span class="w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-300 font-bold flex items-center justify-center shrink-0 mt-0.5">2</span>
+                                <span>Randevu anında sizin <strong class="text-white">Yönetim Panelinize</strong> düşer ve o saat dilimi başka müşterilere otomatik kapatılır.</span>
+                            </li>
+                            <li class="flex items-start gap-2.5">
+                                <span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold flex items-center justify-center shrink-0 mt-0.5">3</span>
+                                <span>Hem size hem müşterinize aynı saniyede otomatik <strong class="text-emerald-400">WhatsApp onay ve konum mesajı</strong> gönderilir.</span>
+                            </li>
+                        </ul>
+
+                        <div class="pt-3 border-t border-white/10">
+                            <button onclick="switchMainView('dashboard')" class="w-full py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-cyan-300 flex items-center justify-center gap-2">
+                                <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                                <span>Tüm İşletme Yönetim Panelini İncele</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SİMÜLATÖR SEKME 2: İŞLETME YÖNETİM PANELİ TABLOSU -->
+                <div id="simTabContent-database" class="hidden bg-[#07070e] border border-emerald-500/30 rounded-2xl p-5 sm:p-8 space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-5">
+                        <div>
+                            <span class="text-xs font-bold uppercase tracking-wider text-emerald-400">Canlı İşletme Yönetim Ekranı</span>
+                            <h3 class="text-xl sm:text-2xl font-black text-white mt-1">Gelen Randevular &amp; Ciro Takibi</h3>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <button onclick="switchSimulatorTab('booking')" class="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold flex items-center gap-1.5">
+                                <i data-lucide="plus" class="w-4 h-4"></i>
+                                <span>Yeni Test Randevusu Ekle</span>
+                            </button>
+                            <button onclick="switchMainView('dashboard')" class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-bold">
+                                Tam Ekran Panele Git &rarr;
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div class="bg-[#0c0c18] border border-white/10 rounded-xl p-4">
+                            <div class="text-xs text-slate-400">Toplam Randevu</div>
+                            <div id="simTotalRecordsCard" class="text-2xl font-black text-white mt-1">3 Kayıt</div>
+                        </div>
+                        <div class="bg-[#0c0c18] border border-white/10 rounded-xl p-4">
+                            <div class="text-xs text-slate-400">Onaylanan Randevu Cirosu</div>
+                            <div id="simTotalRevenueCard" class="text-2xl font-black text-emerald-400 mt-1">7.550 ₺</div>
+                        </div>
+                        <div class="bg-[#0c0c18] border border-white/10 rounded-xl p-4">
+                            <div class="text-xs text-slate-400">Otomatik WhatsApp Bildirimi</div>
+                            <div id="simTotalMessagesCard" class="text-2xl font-black text-cyan-400 mt-1">6 Mesaj İletildi ✓</div>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                            <thead>
+                                <tr class="border-b border-white/10 text-slate-400">
+                                    <th class="py-3 px-2">Kod</th>
+                                    <th class="py-3 px-2">İşletme</th>
+                                    <th class="py-3 px-2">Müşteri</th>
+                                    <th class="py-3 px-2">Hizmet &amp; Ücret</th>
+                                    <th class="py-3 px-2">Tarih / Saat</th>
+                                    <th class="py-3 px-2">Durum</th>
+                                    <th class="py-3 px-2 text-right">Yönetim</th>
+                                </tr>
+                            </thead>
+                            <tbody id="simAppointmentsTableBody" class="divide-y divide-white/5">
+                                <!-- JS ile doldurulur -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- SİMÜLATÖR SEKME 3: CANLI OTOMASYON AKIŞI -->
+                <div id="simTabContent-pipeline" class="hidden bg-[#07070e] border border-cyan-500/30 rounded-2xl p-5 sm:p-8 space-y-8">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-5">
+                        <div>
+                            <span class="text-xs font-bold uppercase tracking-wider text-cyan-400">7/24 Otonom İş Akışı</span>
+                            <h3 class="text-xl sm:text-2xl font-black text-white mt-1">FlowSoft Akıllı Otomasyon Motoru</h3>
+                        </div>
+                        <button id="runPipelineBtn" onclick="runManualPipelineDemo()" class="px-5 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-purple-600 text-white font-bold text-xs sm:text-sm flex items-center gap-2 self-start sm:self-auto shadow-lg">
+                            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                            <span id="runPipelineBtnText">Otomasyonu Şimdi Tetikle</span>
+                        </button>
+                    </div>
+
+                    <div id="pipelineStepsGrid" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <!-- JS ile 4 adım render edilir -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. İNTERAKTİF ROI / İŞLETME KAZANÇ HESAPLAYICI -->
+        <section id="calculator" class="py-16 sm:py-24 px-4 sm:px-8 max-w-6xl mx-auto">
+            <div class="bg-gradient-to-br from-[#0d0d1a] via-[#090912] to-[#0d1322] border border-purple-500/30 rounded-3xl p-6 sm:p-12 shadow-2xl">
+                <div class="max-w-2xl mb-10">
+                    <span class="text-xs font-bold uppercase tracking-wider text-cyan-400">İşletme Kazanç Simülasyonu</span>
+                    <h2 class="text-2xl sm:text-4xl font-black text-white mt-1">FlowSoft İşletmenize Ayda Ne Kadar Kazandırır?</h2>
+                    <p class="text-slate-400 text-sm mt-2">
+                        Günlük ortalama randevu sayınızı ve işlem ücretinizi kaydırarak FlowSoft’un size kazandıracağı zamanı ve kurtarılan ciroyu canlı hesaplayın.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                    <div class="lg:col-span-7 space-y-6">
+                        <div>
+                            <div class="flex justify-between text-sm font-bold mb-2">
+                                <span class="text-slate-300">Günlük Ortalama Randevu Sayınız:</span>
+                                <span id="roiDailyLabel" class="text-cyan-400 text-lg">18 Randevu / Gün</span>
+                            </div>
+                            <input id="roiDailySlider" type="range" min="5" max="60" step="1" value="18" oninput="updateRoiCalculator()" class="w-full">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-sm font-bold mb-2">
+                                <span class="text-slate-300">Ortalama İşlem / Hizmet Ücretiniz:</span>
+                                <span id="roiPriceLabel" class="text-purple-400 text-lg">750 ₺</span>
+                            </div>
+                            <input id="roiPriceSlider" type="range" min="250" max="5000" step="50" value="750" oninput="updateRoiCalculator()" class="w-full">
+                        </div>
+
+                        <p class="text-xs text-slate-400 leading-relaxed bg-white/[0.03] p-4 rounded-xl border border-white/5">
+                            💡 <strong class="text-white">Nasıl Hesaplanır?</strong> Otomatik WhatsApp hatırlatmaları sayesinde unutulan veya son dakika iptal edilen randevuların önüne geçilir, telefon trafiğine harcanan mesai doğrudan müşterilerinize kalır.
+                        </p>
+                    </div>
+
+                    <div class="lg:col-span-5 bg-[#050508] border border-cyan-500/30 rounded-2xl p-6 text-center space-y-5">
+                        <div>
+                            <div class="text-xs text-slate-400 uppercase font-bold">Aylık Kurtarılan Ekstra Ciro</div>
+                            <div id="roiExtraRevenue" class="text-4xl sm:text-5xl font-black text-emerald-400 mt-2">+48.750 ₺</div>
+                            <div id="roiPreventedCount" class="text-[11px] text-slate-400 mt-1">Ayda ~65 unutulan randevu kurtarılır</div>
+                        </div>
+                        <div class="border-t border-white/10 pt-4">
+                            <div class="text-xs text-slate-400 uppercase font-bold">Telefon Trafiğinden Tasarruf Edilen Süre</div>
+                            <div id="roiSavedHours" class="text-2xl font-black text-cyan-400 mt-1">32 Saat / Ay</div>
+                        </div>
+                        <button onclick="openAuthModal('register')" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-purple-600 to-cyan-500 text-white font-bold text-xs sm:text-sm shadow-lg">
+                            Ücretsiz Hesabınızı Şimdi Açın &rarr;
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. FİYATLANDIRMA PAKETLERİ -->
+        <section id="pricing" class="py-16 sm:py-24 px-4 sm:px-8 max-w-7xl mx-auto">
+            <div class="text-center max-w-3xl mx-auto mb-12">
+                <h2 class="text-3xl sm:text-5xl font-black text-white">
+                    İşletmenize Uygun <span class="text-purple-400">Esnek Paketler</span>
+                </h2>
+                <p class="text-slate-400 text-sm sm:text-base mt-3">
+                    Kurulum ücreti veya taahhüt yok. 14 gün ücretsiz deneyin, memnun kalırsanız devam edin.
+                </p>
+
+                <div class="mt-6 inline-flex items-center gap-3 bg-[#0b0b14] p-1.5 rounded-2xl border border-white/10">
+                    <button id="billingMonthlyBtn" onclick="toggleBillingCycle(false)" class="px-4 py-2 rounded-xl text-xs font-bold transition-all text-slate-400">
+                        Aylık Plan
+                    </button>
+                    <button id="billingYearlyBtn" onclick="toggleBillingCycle(true)" class="px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 bg-gradient-to-r from-purple-600 to-cyan-500 text-white">
+                        <span>Yıllık Plan</span>
+                        <span class="px-2 py-0.5 rounded-full bg-black/30 text-[10px] text-emerald-300">%20 İndirimli</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="pricingCardsContainer" class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- JS ile doldurulur -->
+            </div>
+        </section>
+
+        <!-- 7. SIKÇA SORULAN SORULAR (SSS) -->
+        <section id="faq" class="py-16 sm:py-20 px-4 sm:px-8 max-w-4xl mx-auto">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl sm:text-4xl font-black text-white">
+                    Sıkça Sorulan <span class="text-cyan-400">Sorular</span>
+                </h2>
+                <p class="text-slate-400 text-sm mt-2">FlowSoft hakkında merak ettiğiniz tüm detaylar.</p>
+            </div>
+
+            <div id="faqAccordionContainer" class="space-y-4">
+                <!-- JS ile doldurulur -->
+            </div>
+        </section>
+    </main>
+
+    <!-- 8. KURUMSAL FOOTER -->
+    <footer class="relative z-10 border-t border-white/10 bg-[#040407] py-14 px-4 sm:px-8">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10 mb-10">
+            <div class="md:col-span-2 space-y-3">
+                <button onclick="switchMainView('landing', true)" class="text-left focus:outline-none">
+                    <div class="text-xl font-black tracking-tight flex items-center">
+                        <span class="text-white">Flow</span>
+                        <span class="bg-gradient-to-r from-purple-400 via-indigo-400 to-cyan-400 bg-clip-text text-transparent">Soft</span>
+                        <span class="ml-1.5 text-xs font-mono text-purple-400 font-bold">&lt;/&gt;</span>
+                    </div>
+                </button>
+                <p class="text-xs text-slate-400 max-w-sm leading-relaxed pt-1">
+                    FlowSoft; işletmelerin randevu, müşteri iletişimi ve gelir takibi süreçlerini tek bir bulut merkezinden otonom hale getiren yeni nesil SaaS yazılım platformudur.
+                </p>
+            </div>
+
+            <div class="space-y-2.5 text-xs">
+                <div class="font-bold text-white uppercase tracking-wider mb-3">Platform</div>
+                <button onclick="navigateToSection('solutions')" class="block text-slate-400 hover:text-white">Çözümlerimiz</button>
+                <button onclick="navigateToSection('simulator')" class="block text-slate-400 hover:text-white">Canlı Sistem Testi</button>
+                <button onclick="navigateToSection('pricing')" class="block text-slate-400 hover:text-white">Fiyatlandırma</button>
+                <button onclick="switchMainView('dashboard')" class="block text-cyan-400 hover:underline font-semibold">Yönetim Panelini Aç &rarr;</button>
+            </div>
+
+            <div class="space-y-2.5 text-xs">
+                <div class="font-bold text-white uppercase tracking-wider mb-3">Kurumsal &amp; İletişim</div>
+                <button onclick="openContactModal()" class="block text-slate-400 hover:text-white">Bize Ulaşın / Demo Talebi</button>
+                <button onclick="openAuthModal('login')" class="block text-slate-400 hover:text-white">Müşteri Girişi</button>
+                <button onclick="openAuthModal('register')" class="block text-slate-400 hover:text-white">Yeni İşletme Kaydı</button>
+                <div class="text-slate-500 pt-1">destek@flowsoft.com</div>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+            <div>&copy; 2026 FlowSoft Yazılım ve Otomasyon Teknolojileri. Tüm hakları saklıdır.</div>
+            <div class="font-mono text-slate-400">BUILD • AUTOMATE • GROW &lt;/&gt;</div>
+        </div>
+    </footer>
+
+    <!-- ========================================================================= -->
+    <!-- MODAL 1: GİRİŞ YAP & YENİ İŞLETME KAYDI MODALI                             -->
+    <!-- ========================================================================= -->
+    <div id="authModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="bg-[#0b0b16] border border-purple-500/40 rounded-3xl max-w-md w-full p-6 sm:p-8 relative shadow-[0_0_60px_rgba(139,92,246,0.35)]">
+            <button onclick="closeAuthModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-white/5">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+
+            <!-- Sekme Başlıkları: Giriş Yap vs Kayıt Ol -->
+            <div class="grid grid-cols-2 gap-2 bg-[#06060c] p-1.5 rounded-2xl border border-white/10 mb-6 mt-2">
+                <button id="authTabBtn-login" onclick="switchAuthModalTab('login')" class="py-2.5 rounded-xl text-xs font-bold transition-all bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
+                    İşletme Girişi
+                </button>
+                <button id="authTabBtn-register" onclick="switchAuthModalTab('register')" class="py-2.5 rounded-xl text-xs font-bold transition-all text-slate-400 hover:text-white">
+                    Yeni Hesap Aç (Ücretsiz)
+                </button>
+            </div>
+
+            <!-- GİRİŞ YAP FORMU -->
+            <div id="authTabContent-login" class="space-y-4">
+                <div class="text-center mb-4">
+                    <h3 class="text-xl font-black text-white">FlowSoft Yönetim Paneline Giriş</h3>
+                    <p class="text-xs text-slate-400 mt-1">Randevularınızı ve WhatsApp asistanınızı yönetmek için giriş yapın.</p>
+                </div>
+
+                <!-- Tek Tıkla Hızlı Demo Giriş -->
+                <button type="button" onclick="handleQuickDemoLogin()" class="w-full py-3.5 px-4 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 text-emerald-300 font-bold text-xs flex items-center justify-center gap-2 transition-all">
+                    <i data-lucide="zap" class="w-4 h-4"></i>
+                    <span>Hızlı Demo Girişi (Şifresiz Tek Tıkla Paneli Aç)</span>
+                </button>
+
+                <div class="relative flex py-1 items-center">
+                    <div class="flex-grow border-t border-white/10"></div>
+                    <span class="flex-shrink mx-3 text-[11px] text-slate-500 uppercase font-semibold">veya e-posta ile</span>
+                    <div class="flex-grow border-t border-white/10"></div>
+                </div>
+
+                <form onsubmit="handleLoginFormSubmit(event)" class="space-y-3.5">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">E-Posta veya Kullanıcı Adı</label>
+                        <input id="loginEmailInput" type="email" required value="yonetim@ahmetvipstudio.com" class="w-full bg-[#050508] border border-white/15 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-purple-400">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Şifre</label>
+                        <input id="loginPasswordInput" type="password" required value="12345678" class="w-full bg-[#050508] border border-white/15 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-purple-400">
+                    </div>
+                    <button type="submit" class="w-full py-4 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 text-white font-black text-sm shadow-lg flex items-center justify-center gap-2">
+                        <i data-lucide="log-in" class="w-4 h-4"></i>
+                        <span>Yönetim Paneline Giriş Yap</span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- YENİ İŞLETME KAYDI FORMU -->
+            <div id="authTabContent-register" class="hidden space-y-4">
+                <div class="text-center mb-3">
+                    <span class="px-3 py-1 rounded-full bg-cyan-500/15 text-cyan-300 text-[11px] font-bold">14 Gün Ücretsiz • Kredi Kartı Gerekmez</span>
+                    <h3 class="text-xl font-black text-white mt-2">60 Saniyede İşletme Hesabınızı Açın</h3>
+                </div>
+
+                <form onsubmit="handleRegisterFormSubmit(event)" class="space-y-3.5">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">İşletme / Marka Adınız</label>
+                        <input id="regBusinessName" oninput="updateRegSlugPreview(this.value)" type="text" required placeholder="Örn: Maya Güzellik Merkezi" class="w-full bg-[#050508] border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-400">
+                        <div class="text-[11px] font-mono text-emerald-400 mt-1">
+                            Özel Linkiniz: flowsoft.com/<span id="regSlugPreview">isletmeniz</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Sektörünüz</label>
+                        <select id="regCategory" class="w-full bg-[#050508] border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-400">
+                            <option value="Kuaför & Güzellik Salonu">Kuaför &amp; Güzellik Salonu</option>
+                            <option value="Sağlık & Diş Kliniği">Sağlık &amp; Diş Kliniği</option>
+                            <option value="Oto Detailing & Bakım">Oto Detailing &amp; Bakım</option>
+                            <option value="Spor, Pilates & Diyetisyen">Spor, Pilates &amp; Diyetisyen</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">WhatsApp Telefon Numaranız</label>
+                        <input id="regPhone" type="tel" required placeholder="0532 000 00 00" class="w-full bg-[#050508] border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-400">
+                    </div>
+                    <button type="submit" class="w-full py-4 rounded-xl bg-gradient-to-r from-purple-600 to-cyan-500 text-white font-black text-sm shadow-lg flex items-center justify-center gap-2">
+                        <i data-lucide="sparkles" class="w-4 h-4"></i>
+                        <span>Hesabımı Oluştur ve Paneli Aç &rarr;</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- MODAL 2: YENİ RANDEVU EKLEME MODALI (YÖNETİM PANELİ İÇİN)                  -->
+    <!-- ========================================================================= -->
+    <div id="newAppointmentModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="bg-[#0b0b16] border border-cyan-500/40 rounded-3xl max-w-md w-full p-6 sm:p-8 relative shadow-2xl">
+            <button onclick="closeNewAppointmentModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <h3 class="text-xl font-black text-white mb-1">Manuel Randevu Kaydı Ekle</h3>
+            <p class="text-xs text-slate-400 mb-5">Kaydettiğiniz anda müşteriye otomatik WhatsApp onay mesajı iletilir.</p>
+
+            <form onsubmit="handleDashboardNewAppointment(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Müşteri Adı Soyadı</label>
+                    <input id="modalCustName" type="text" required placeholder="Örn: Zeynep Aksoy" class="w-full bg-[#050508] border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-400">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">WhatsApp Telefonu</label>
+                    <input id="modalCustPhone" type="text" required placeholder="0532 555 44 33" class="w-full bg-[#050508] border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-400">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Hizmet Seçin</label>
+                    <select id="modalServiceSelect" class="w-full bg-[#050508] border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-400">
+                        <!-- JS ile doldurulur -->
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Gün</label>
+                        <select id="modalDateSelect" class="w-full bg-[#050508] border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white">
+                            <option value="Bugün">Bugün</option>
+                            <option value="Yarın" selected>Yarın</option>
+                            <option value="Cuma">Cuma</option>
+                            <option value="Cumartesi">Cumartesi</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Saat</label>
+                        <select id="modalTimeSelect" class="w-full bg-[#050508] border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white">
+                            <option value="10:30">10:30</option>
+                            <option value="13:00">13:00</option>
+                            <option value="15:30" selected>15:30</option>
+                            <option value="17:30">17:30</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-purple-600 to-cyan-500 text-white font-bold text-sm shadow-lg">
+                    Randevuyu Kaydet &amp; WhatsApp Gönder
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- MODAL 3: KURUMSAL İLETİŞİM & DEMO TALEBİ MODALI                            -->
+    <!-- ========================================================================= -->
+    <div id="contactModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="bg-[#0b0b16] border border-cyan-500/40 rounded-3xl max-w-md w-full p-6 sm:p-8 relative">
+            <button onclick="closeContactModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <h3 class="text-xl font-black text-white mb-2">Kurumsal İletişim &amp; Demo</h3>
+            <p class="text-xs text-slate-400 mb-5">
+                Ekibimiz işletmenize özel kurulum için 15 dakika içinde sizinle iletişime geçsin.
+            </p>
+            <form onsubmit="handleContactSubmit(event)" class="space-y-4">
+                <input id="contactBusinessName" type="text" required placeholder="İşletme Adınız" class="w-full bg-[#050508] border border-white/15 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-cyan-400">
+                <input id="contactPhone" type="tel" required placeholder="Telefon Numaranız" class="w-full bg-[#050508] border border-white/15 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-cyan-400">
+                <button type="submit" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-purple-600 to-cyan-500 text-white font-bold text-sm">
+                    Ücretsiz Kurulum Talep Et
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- UYGULAMA MANTIĞI (PURE JAVASCRIPT STATE ENGINE)                           -->
+    <!-- ========================================================================= -->
+    <script>
+        // 1. UYGULAMA VERİ VE STATE MERKEZİ
+        const BUSINESS_PRESETS = [
+            {
+                id: 'kuafor',
+                name: 'Ahmet VIP Studio',
+                slug: 'ahmet-vip-studio',
+                category: 'Erkek Kuaförü & Bakım',
+                services: [
+                    { id: 's1', title: 'VIP Saç & Sakal Tasarımı', duration: '45 dk', price: 650 },
+                    { id: 's2', title: 'Cilt Bakımı & Keratin Maske', duration: '60 dk', price: 950 },
+                    { id: 's3', title: 'Damat Paketi (Tam Bakım)', duration: '90 dk', price: 2400 }
+                ]
+            },
+            {
+                id: 'klinik',
+                name: 'Lumina Diş Kliniği',
+                slug: 'lumina-dis-klinigi',
+                category: 'Sağlık & Estetik Kliniği',
+                services: [
+                    { id: 's4', title: 'Dijital Gülüş Tasarımı Muayenesi', duration: '30 dk', price: 1200 },
+                    { id: 's5', title: 'Lazer Diş Beyazlatma', duration: '45 dk', price: 4500 },
+                    { id: 's6', title: 'İmplant & Panoramik Kontrol', duration: '40 dk', price: 1800 }
+                ]
+            },
+            {
+                id: 'oto',
+                name: 'Veloce Oto Detailing',
+                slug: 'veloce-oto-detailing',
+                category: 'Seramik Kaplama & Oto Bakım',
+                services: [
+                    { id: 's7', title: 'Detaylı İç-Dış Buharlı Temizlik', duration: '120 dk', price: 2200 },
+                    { id: 's8', title: '9H Nano Seramik Kaplama', duration: '240 dk', price: 8500 },
+                    { id: 's9', title: 'PPF Şeffaf Boya Koruma', duration: '180 dk', price: 14000 }
+                ]
+            }
+        ];
+
+        const FAQ_ITEMS = [
+            {
+                q: 'FlowSoft sistemini kullanmak için teknik bilgi veya kurulum gerekiyor mu?',
+                a: 'Hayır. Hiçbir program indirmenize veya teknik bilgiye ihtiyacınız yoktur. Hesabınızı açtığınız anda size özel randevu linkiniz ve yönetim paneliniz bulut üzerinde otomatik olarak hazırlanır.'
+            },
+            {
+                q: 'Müşterilerim randevu alırken uygulama indirmek zorunda mı?',
+                a: 'Kesinlikle hayır. Instagram biyografinize veya WhatsApp profilinize eklediğiniz özel FlowSoft bağlantınıza tıklayan müşterileriniz, uygulama indirmeden 15 saniyede randevu oluşturabilir.'
+            },
+            {
+                q: 'Otomatik WhatsApp mesajları nasıl çalışıyor?',
+                a: 'Müşteriniz randevu oluşturduğunda, iptal ettiğinde veya randevu saati yaklaştığında FlowSoft Otomasyon Motoru devreye girer ve işletmenizin adıyla anında WhatsApp onay/hatırlatma mesajı gönderir.'
+            },
+            {
+                q: 'İstediğim zaman aboneliğimi değiştirebilir veya iptal edebilir miyim?',
+                a: 'Evet. Taahhüt veya cayma bedeli yoktur. Dilediğiniz zaman paketinizi yükseltebilir veya tek tıkla aboneliğinizi sonlandırabilirsiniz.'
+            }
+        ];
+
+        let state = {
+            currentMainView: 'landing', // 'landing' | 'dashboard'
+            isLoggedIn: false,
+            activeBusinessName: 'Ahmet VIP Studio',
+            activeBusinessSlug: 'ahmet-vip-studio',
+            activePlanName: 'Profesyonel Paket',
+            selectedPresetIndex: 0,
+            selectedServiceIndex: 0,
+            selectedDate: 'Yarın',
+            selectedTime: '14:30',
+            simulatorTab: 'booking',
+            dashboardSubTab: 'overview',
+            pipelineStep: 4,
+            isPipelineRunning: false,
+            isYearlyBilling: true,
+            openFaqIndex: 0,
+            appointments: [
+                {
+                    id: 'FS-9042',
+                    tenant: 'Ahmet VIP Studio',
+                    slug: 'ahmet-vip-studio',
+                    customer: 'Burak Demir',
+                    phone: '0544 312 88 19',
+                    service: 'VIP Saç & Sakal Tasarımı',
+                    price: 650,
+                    date: 'Bugün',
+                    time: '16:00',
+                    status: 'Onaylandı'
+                },
+                {
+                    id: 'FS-8814',
+                    tenant: 'Lumina Diş Kliniği',
+                    slug: 'lumina-dis-klinigi',
+                    customer: 'Selin Kaya',
+                    phone: '0533 710 45 22',
+                    service: 'Lazer Diş Beyazlatma',
+                    price: 4500,
+                    date: 'Yarın',
+                    time: '11:30',
+                    status: 'Onaylandı'
+                },
+                {
+                    id: 'FS-7621',
+                    tenant: 'Ahmet VIP Studio',
+                    slug: 'ahmet-vip-studio',
+                    customer: 'Kerem Arslan',
+                    phone: '0505 892 11 04',
+                    service: 'Damat Paketi (Tam Bakım)',
+                    price: 2400,
+                    date: 'Cuma',
+                    time: '13:00',
+                    status: 'Bekliyor'
+                }
+            ],
+            tenants: [
+                { id: 't1', name: 'Ahmet VIP Studio', slug: 'ahmet-vip-studio', plan: 'Profesyonel', mrr: 1490, status: 'Aktif' },
+                { id: 't2', name: 'Lumina Diş Kliniği', slug: 'lumina-dis-klinigi', plan: 'Kurumsal', mrr: 2990, status: 'Aktif' },
+                { id: 't3', name: 'Veloce Oto Detailing', slug: 'veloce-oto-detailing', plan: 'Profesyonel', mrr: 1490, status: 'Aktif' },
+                { id: 't4', name: 'FitZone Pilates Studio', slug: 'fitzone-pilates', plan: 'Başlangıç', mrr: 890, status: 'Aktif' }
+            ]
+        };
+
+        // Yardımcı: Türkçe Karakter Uyumlu URL Slug Üretici
+        function createSlug(text) {
+            const raw = (text || 'isletme-adi').trim();
+            return raw
+                .toLowerCase()
+                .replace(/ğ/g, 'g')
+                .replace(/ü/g, 'u')
+                .replace(/ş/g, 's')
+                .replace(/ı/g, 'i')
+                .replace(/ö/g, 'o')
+                .replace(/ç/g, 'c')
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/^-+|-+$/g, '') || 'isletme';
+        }
+
+        // Yardımcı: Sağ Üst Bildirim Toast Gösterici (Alert yerine)
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            const borderColor = type === 'success' ? 'border-emerald-500/60' : 'border-cyan-500/60';
+            const badgeColor = type === 'success' ? 'bg-emerald-500 text-black' : 'bg-cyan-400 text-black';
+
+            toast.className = `pointer-events-auto flex items-center gap-3 bg-[#0c0c16]/95 backdrop-blur-xl border ${borderColor} rounded-2xl p-3.5 shadow-[0_0_30px_rgba(0,0,0,0.6)] text-xs font-semibold text-white transition-all duration-300`;
+            toast.innerHTML = `
+                <span class="w-6 h-6 rounded-full ${badgeColor} font-black flex items-center justify-center shrink-0">✓</span>
+                <span class="flex-1 leading-snug">${message}</span>
+            `;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(-8px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3400);
+        }
+
+        // Yardımcı: Canlı WhatsApp Popup Gösterici
+        function showWhatsappPopup({ business, customer, service, date, time, phone, customBody }) {
+            const popup = document.getElementById('whatsappPopup');
+            document.getElementById('wpTitle').textContent = `✅ Randevu Onayı • ${business}`;
+            if (customBody) {
+                document.getElementById('wpBody').textContent = customBody;
+            } else {
+                document.getElementById('wpBody').innerHTML = `Sayın <strong class="text-white">${customer}</strong>, <span class="text-cyan-300">${service}</span> randevunuz <span class="underline">${date} saat ${time}</span> için onaylanmıştır.`;
+            }
+            document.getElementById('wpPhone').textContent = `📞 ${phone || '0532 480 90 10'}`;
+            popup.classList.remove('hidden');
+        }
+
+        function closeWhatsappPopup() {
+            document.getElementById('whatsappPopup').classList.add('hidden');
+        }
+
+        // 2. ANA GÖRÜNÜM GEÇİŞLERİ (LANDING <-> DASHBOARD)
+        function switchMainView(view, scrollTop = true) {
+            state.currentMainView = view;
+            const landingEl = document.getElementById('landingView');
+            const dashEl = document.getElementById('dashboardView');
+
+            if (view === 'dashboard') {
+                landingEl.classList.add('hidden');
+                dashEl.classList.remove('hidden');
+                renderDashboardHeader();
+                renderAllAppointmentTables();
+                renderTenantsTable();
+                renderDashboardServices();
+            } else {
+                dashEl.classList.add('hidden');
+                landingEl.classList.remove('hidden');
+            }
+            if (scrollTop) {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+            lucide.createIcons();
+        }
+
+        function navigateToSection(sectionId) {
+            toggleMobileMenu(false);
+            if (state.currentMainView !== 'landing') {
+                switchMainView('landing', false);
+            }
+            setTimeout(() => {
+                const el = document.getElementById(sectionId);
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+            }, 60);
+        }
+
+        function openSimulatorTabAndScroll(tabName) {
+            switchSimulatorTab(tabName);
+            navigateToSection('simulator');
+        }
+
+        function toggleMobileMenu(forceState) {
+            const drawer = document.getElementById('mobileMenuDrawer');
+            const isHidden = drawer.classList.contains('hidden');
+            const nextState = typeof forceState === 'boolean' ? forceState : isHidden;
+            if (nextState) {
+                drawer.classList.remove('hidden');
+            } else {
+                drawer.classList.add('hidden');
+            }
+        }
+
+        // 3. GİRİŞ YAP / KAYIT OL MODAL YÖNETİMİ
+        function openAuthModal(defaultTab = 'login') {
+            document.getElementById('authModal').classList.remove('hidden');
+            switchAuthModalTab(defaultTab);
+            lucide.createIcons();
+        }
+
+        function closeAuthModal() {
+            document.getElementById('authModal').classList.add('hidden');
+        }
+
+        function switchAuthModalTab(tab) {
+            const loginBtn = document.getElementById('authTabBtn-login');
+            const regBtn = document.getElementById('authTabBtn-register');
+            const loginContent = document.getElementById('authTabContent-login');
+            const regContent = document.getElementById('authTabContent-register');
+
+            if (tab === 'login') {
+                loginBtn.className = 'py-2.5 rounded-xl text-xs font-bold transition-all bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow';
+                regBtn.className = 'py-2.5 rounded-xl text-xs font-bold transition-all text-slate-400 hover:text-white';
+                loginContent.classList.remove('hidden');
+                regContent.classList.add('hidden');
+            } else {
+                regBtn.className = 'py-2.5 rounded-xl text-xs font-bold transition-all bg-gradient-to-r from-purple-600 to-cyan-500 text-white shadow';
+                loginBtn.className = 'py-2.5 rounded-xl text-xs font-bold transition-all text-slate-400 hover:text-white';
+                regContent.classList.remove('hidden');
+                loginContent.classList.add('hidden');
+            }
+        }
+
+        function updateRegSlugPreview(val) {
+            document.getElementById('regSlugPreview').textContent = createSlug(val || 'isletmeniz');
+        }
+
+        function handleQuickDemoLogin() {
+            state.isLoggedIn = true;
+            updateHeaderAuthUI();
+            closeAuthModal();
+            switchMainView('dashboard');
+            showToast(`Hoş geldiniz! ${state.activeBusinessName} yönetim paneli açıldı.`);
+        }
+
+        function handleLoginFormSubmit(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmailInput').value.trim();
+            state.isLoggedIn = true;
+            updateHeaderAuthUI();
+            closeAuthModal();
+            switchMainView('dashboard');
+            showToast(`Giriş başarılı (${email}). Yönetim paneliniz hazır!`);
+        }
+
+        function handleRegisterFormSubmit(e) {
+            e.preventDefault();
+            const name = document.getElementById('regBusinessName').value.trim() || 'Yeni İşletmem';
+            const slug = createSlug(name);
+
+            state.activeBusinessName = name;
+            state.activeBusinessSlug = slug;
+            state.isLoggedIn = true;
+
+            // Tenants listesine ekle
+            state.tenants.unshift({
+                id: 't-' + Date.now(),
+                name: name,
+                slug: slug,
+                plan: 'Profesyonel',
+                mrr: 1490,
+                status: 'Aktif'
+            });
+
+            document.getElementById('simCustomBusinessInput').value = name;
+            handleCustomBusinessNameInput(name);
+
+            updateHeaderAuthUI();
+            closeAuthModal();
+            switchMainView('dashboard');
+            showToast(`Tebrikler! ${name} hesabınız ve flowsoft.com/${slug} adresiniz oluşturuldu.`);
+        }
+
+        function handleLogout() {
+            state.isLoggedIn = false;
+            updateHeaderAuthUI();
+            switchMainView('landing');
+            showToast('Hesabınızdan güvenle çıkış yapıldı.');
+        }
+
+        function updateHeaderAuthUI() {
+            const btnText = document.getElementById('headerAuthBtnText');
+            if (state.isLoggedIn) {
+                btnText.textContent = state.activeBusinessName;
+            } else {
+                btnText.textContent = 'Giriş Yap';
+            }
+        }
+
+        function renderDashboardHeader() {
+            document.getElementById('dashBusinessTitle').textContent = state.activeBusinessName;
+            document.getElementById('dashBusinessUrl').textContent = `flowsoft.com/${state.activeBusinessSlug}`;
+            document.getElementById('dashActivePlanBadge').textContent = state.activePlanName;
+        }
+
+        // Hero Hızlı Sayfa Oluşturma
+        function handleHeroQuickGenerate() {
+            const val = document.getElementById('heroQuickBusinessInput').value.trim();
+            const targetName = val || 'Maya VIP Studio';
+            document.getElementById('simCustomBusinessInput').value = targetName;
+            handleCustomBusinessNameInput(targetName);
+            navigateToSection('simulator');
+            showToast(`✅ flowsoft.com/${createSlug(targetName)} randevu sayfanız simülatörde hazırlandı!`);
+        }
+
+        // Link Kopyalama (iFrame uyumlu execCommand)
+        function copyActiveBookingUrl() {
+            const url = `https://flowsoft.com/${state.activeBusinessSlug}`;
+            const tempInput = document.createElement('textarea');
+            tempInput.value = url;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            showToast(`Özel randevu linkiniz kopyalandı: ${url}`);
+        }
+
+        // 4. SİMÜLATÖR FONKSİYONLARI
+        function renderSimulatorPresets() {
+            const container = document.getElementById('presetButtonsContainer');
+            container.innerHTML = BUSINESS_PRESETS.map((preset, idx) => {
+                const isSelected = state.selectedPresetIndex === idx;
+                const cls = isSelected
+                    ? 'bg-gradient-to-r from-purple-600 to-cyan-500 text-white shadow-md'
+                    : 'bg-[#141424] text-slate-300 hover:bg-white/10 border border-white/10';
+                return `<button type="button" onclick="selectPreset(${idx})" class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${cls}">${preset.name}</button>`;
+            }).join('');
+        }
+
+        function selectPreset(index) {
+            state.selectedPresetIndex = index;
+            state.selectedServiceIndex = 0;
+            const preset = BUSINESS_PRESETS[index];
+            state.activeBusinessName = preset.name;
+            state.activeBusinessSlug = preset.slug;
+
+            document.getElementById('simCustomBusinessInput').value = preset.name;
+            document.getElementById('simGeneratedSlug').textContent = preset.slug;
+            document.getElementById('simPresetCategory').textContent = preset.category;
+            document.getElementById('simPreviewBusinessTitle').textContent = preset.name;
+
+            renderSimulatorPresets();
+            renderSimulatorBookingForm();
+            renderDashboardHeader();
+            renderDashboardServices();
+        }
+
+        function handleCustomBusinessNameInput(val) {
+            const cleanName = val.trim() || 'Ahmet VIP Studio';
+            const slug = createSlug(cleanName);
+            state.activeBusinessName = cleanName;
+            state.activeBusinessSlug = slug;
+            document.getElementById('simGeneratedSlug').textContent = slug;
+            document.getElementById('simPreviewBusinessTitle').textContent = cleanName;
+            renderDashboardHeader();
+        }
+
+        function renderSimulatorBookingForm() {
+            const preset = BUSINESS_PRESETS[state.selectedPresetIndex];
+            const servicesGrid = document.getElementById('simServicesGrid');
+            servicesGrid.innerHTML = preset.services.map((srv, idx) => {
+                const active = state.selectedServiceIndex === idx;
+                const cls = active
+                    ? 'bg-purple-600/20 border-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.25)]'
+                    : 'bg-[#0d0d18] border-white/10 hover:border-white/25';
+                return `
+                    <button type="button" onclick="selectSimService(${idx})" class="p-3.5 rounded-xl border text-left transition-all ${cls}">
+                        <div class="font-bold text-xs text-white truncate">${srv.title}</div>
+                        <div class="flex items-center justify-between mt-2 text-[11px]">
+                            <span class="text-slate-400">${srv.duration}</span>
+                            <span class="font-extrabold text-cyan-400">${srv.price} ₺</span>
+                        </div>
+                    </button>
+                `;
+            }).join('');
+
+            const days = ['Bugün', 'Yarın', 'Cuma'];
+            document.getElementById('simDateButtons').innerHTML = days.map(day => {
+                const active = state.selectedDate === day;
+                const cls = active
+                    ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300'
+                    : 'bg-[#0d0d18] border-white/10 text-slate-400 hover:text-white';
+                return `<button type="button" onclick="selectSimDate('${day}')" class="py-2.5 rounded-xl text-xs font-bold border ${cls}">${day}</button>`;
+            }).join('');
+
+            const times = ['11:00', '14:30', '17:00'];
+            document.getElementById('simTimeButtons').innerHTML = times.map(time => {
+                const active = state.selectedTime === time;
+                const cls = active
+                    ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300'
+                    : 'bg-[#0d0d18] border-white/10 text-slate-400 hover:text-white';
+                return `<button type="button" onclick="selectSimTime('${time}')" class="py-2.5 rounded-xl text-xs font-bold border ${cls}">${time}</button>`;
+            }).join('');
+        }
+
+        function selectSimService(idx) {
+            state.selectedServiceIndex = idx;
+            renderSimulatorBookingForm();
+        }
+
+        function selectSimDate(day) {
+            state.selectedDate = day;
+            renderSimulatorBookingForm();
+        }
+
+        function selectSimTime(time) {
+            state.selectedTime = time;
+            renderSimulatorBookingForm();
+        }
+
+        function switchSimulatorTab(tab) {
+            state.simulatorTab = tab;
+            const tabs = ['booking', 'database', 'pipeline'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`simTabBtn-${t}`);
+                const content = document.getElementById(`simTabContent-${t}`);
+                if (t === tab) {
+                    content.classList.remove('hidden');
+                    btn.className = 'flex-1 sm:flex-initial px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-cyan-500 text-white shadow';
+                } else {
+                    content.classList.add('hidden');
+                    btn.className = 'flex-1 sm:flex-initial px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 text-slate-400 hover:text-white';
+                }
+            });
+            lucide.createIcons();
+        }
+
+        function handleSimulatorBookingSubmit(e) {
+            e.preventDefault();
+            const preset = BUSINESS_PRESETS[state.selectedPresetIndex];
+            const chosenService = preset.services[state.selectedServiceIndex] || preset.services[0];
+            const customer = document.getElementById('simCustomerName').value.trim() || 'Misafir Müşteri';
+            const phone = document.getElementById('simCustomerPhone').value.trim() || '0532 000 00 00';
+
+            const newRecord = {
+                id: 'FS-' + Math.floor(1000 + Math.random() * 9000),
+                tenant: state.activeBusinessName,
+                slug: state.activeBusinessSlug,
+                customer: customer,
+                phone: phone,
+                service: chosenService.title,
+                price: chosenService.price,
+                date: state.selectedDate,
+                time: state.selectedTime,
+                status: 'Onaylandı'
+            };
+
+            state.appointments.unshift(newRecord);
+            renderAllAppointmentTables();
+            switchSimulatorTab('database');
+            runAutomationPipeline(newRecord);
+            showToast(`Yeni randevu oluşturuldu (${newRecord.id}) ve yönetim paneline eklendi!`);
+        }
+
+        // 5. OTOMASYON AKIŞI ANİMASYONU
+        function renderPipelineSteps() {
+            const nodes = [
+                {
+                    step: 1,
+                    title: '1. Online Randevu Talebi',
+                    subtitle: 'Müşteri Saatini Seçer',
+                    desc: 'Müşteriniz size özel web sayfasından uygun gün ve saati seçerek formu onaylar.',
+                    tag: 'Web & Mobil Vitrin'
+                },
+                {
+                    step: 2,
+                    title: '2. Takvim Senkronizasyonu',
+                    subtitle: 'Çakışma Kontrolü',
+                    desc: 'Sistem seçilen saati saniyeler içinde bloke eder ve personel takvimine işler.',
+                    tag: 'Akıllı Takvim'
+                },
+                {
+                    step: 3,
+                    title: '3. Bulut Kayıt & Ciro',
+                    subtitle: 'Yönetim Paneline Kayıt',
+                    desc: 'Müşteri geçmişi, seçilen hizmet tutarı ve randevu detayı panelinize eklenir.',
+                    tag: 'FlowSoft Cloud'
+                },
+                {
+                    step: 4,
+                    title: '4. WhatsApp & SMS Onayı',
+                    subtitle: 'Anında Otomatik Mesaj',
+                    desc: 'Müşterinize onay mesajı ve randevudan 2 saat önce otomatik hatırlatma iletilir.',
+                    tag: 'WhatsApp Asistanı'
+                }
+            ];
+
+            const grid = document.getElementById('pipelineStepsGrid');
+            grid.innerHTML = nodes.map(node => {
+                const isActive = state.pipelineStep >= node.step;
+                const cardCls = isActive
+                    ? 'bg-gradient-to-b from-cyan-500/15 to-purple-600/10 border-cyan-400 shadow-[0_0_25px_rgba(6,182,212,0.2)]'
+                    : 'bg-[#0c0c16] border-white/10 opacity-60';
+                const badgeCls = isActive
+                    ? 'bg-emerald-400 text-black'
+                    : 'bg-white/10 text-slate-400';
+                return `
+                    <div class="relative rounded-2xl p-5 border transition-all duration-300 ${cardCls}">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="px-2.5 py-1 rounded-lg bg-white/10 text-[10px] font-bold text-cyan-300">${node.tag}</span>
+                            <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${badgeCls}">
+                                ${isActive ? '✓' : node.step}
+                            </div>
+                        </div>
+                        <h4 class="font-extrabold text-white text-sm">${node.title}</h4>
+                        <div class="text-xs font-semibold text-cyan-300 mt-0.5">${node.subtitle}</div>
+                        <p class="text-xs text-slate-400 mt-2 leading-relaxed">${node.desc}</p>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function runAutomationPipeline(record) {
+            state.isPipelineRunning = true;
+            state.pipelineStep = 1;
+            renderPipelineSteps();
+
+            const btnText = document.getElementById('runPipelineBtnText');
+            if (btnText) btnText.textContent = 'Otomasyon Çalışıyor...';
+
+            setTimeout(() => { state.pipelineStep = 2; renderPipelineSteps(); }, 450);
+            setTimeout(() => { state.pipelineStep = 3; renderPipelineSteps(); }, 950);
+            setTimeout(() => {
+                state.pipelineStep = 4;
+                state.isPipelineRunning = false;
+                renderPipelineSteps();
+                if (btnText) btnText.textContent = 'Otomasyonu Şimdi Tetikle';
+                showWhatsappPopup({
+                    business: record.tenant,
+                    customer: record.customer,
+                    service: record.service,
+                    date: record.date,
+                    time: record.time,
+                    phone: record.phone
+                });
+            }, 1450);
+        }
+
+        function runManualPipelineDemo() {
+            if (state.isPipelineRunning) return;
+            const preset = BUSINESS_PRESETS[state.selectedPresetIndex];
+            const chosenService = preset.services[state.selectedServiceIndex] || preset.services[0];
+            runAutomationPipeline({
+                tenant: state.activeBusinessName,
+                customer: document.getElementById('simCustomerName').value || 'Emirhan Yılmaz',
+                service: chosenService.title,
+                date: state.selectedDate,
+                time: state.selectedTime,
+                phone: document.getElementById('simCustomerPhone').value || '0532 480 90 10'
+            });
+        }
+
+        // 6. RANDEVU TABLOLARI & DASHBOARD YÖNETİMİ
+        function renderAllAppointmentTables() {
+            const totalRevenue = state.appointments
+                .filter(a => a.status !== 'İptal Edildi')
+                .reduce((acc, cur) => acc + cur.price, 0);
+
+            // Sayaç ve KPI Güncellemeleri
+            document.getElementById('simAppointmentsCount').textContent = state.appointments.length;
+            document.getElementById('dashCountBadge').textContent = state.appointments.length;
+            document.getElementById('simTotalRecordsCard').textContent = `${state.appointments.length} Kayıt`;
+            document.getElementById('simTotalRevenueCard').textContent = `${totalRevenue.toLocaleString('tr-TR')} ₺`;
+            document.getElementById('simTotalMessagesCard').textContent = `${state.appointments.length * 2} Mesaj İletildi ✓`;
+
+            document.getElementById('kpiTotalAppointments').textContent = state.appointments.length;
+            document.getElementById('kpiTotalRevenue').textContent = `${totalRevenue.toLocaleString('tr-TR')} ₺`;
+            document.getElementById('kpiWhatsappCount').textContent = `${state.appointments.length * 2} İleti ✓`;
+
+            // Simülatör Tablosu
+            const simTbody = document.getElementById('simAppointmentsTableBody');
+            simTbody.innerHTML = state.appointments.map(apt => createAppointmentRowHTML(apt)).join('');
+
+            // Dashboard Tablosu (Arama ve Filtre Destekli)
+            const searchVal = (document.getElementById('dashSearchInput')?.value || '').toLowerCase();
+            const statusFilter = document.getElementById('dashStatusFilter')?.value || 'ALL';
+
+            const filtered = state.appointments.filter(apt => {
+                const matchesSearch = apt.customer.toLowerCase().includes(searchVal) ||
+                                      apt.service.toLowerCase().includes(searchVal) ||
+                                      apt.tenant.toLowerCase().includes(searchVal);
+                const matchesStatus = statusFilter === 'ALL' || apt.status === statusFilter;
+                return matchesSearch && matchesStatus;
+            });
+
+            const dashTbody = document.getElementById('dashAppointmentsTableBody');
+            if (filtered.length === 0) {
+                dashTbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-slate-500">Arama kriterine uygun randevu bulunamadı.</td></tr>`;
+            } else {
+                dashTbody.innerHTML = filtered.map(apt => createAppointmentRowHTML(apt)).join('');
+            }
+            lucide.createIcons();
+        }
+
+        function createAppointmentRowHTML(apt) {
+            const statusBadge = apt.status === 'Onaylandı'
+                ? 'bg-emerald-500/15 text-emerald-400'
+                : apt.status === 'İptal Edildi'
+                ? 'bg-rose-500/15 text-rose-400'
+                : 'bg-amber-500/15 text-amber-300';
+
+            return `
+                <tr class="hover:bg-white/[0.02] transition-colors">
+                    <td class="py-3.5 px-2 font-mono text-xs text-purple-400 font-bold">${apt.id}</td>
+                    <td class="py-3.5 px-2 font-bold text-white">${apt.tenant}</td>
+                    <td class="py-3.5 px-2">
+                        <div class="font-semibold text-slate-200">${apt.customer}</div>
+                        <div class="text-[11px] text-slate-500">${apt.phone}</div>
+                    </td>
+                    <td class="py-3.5 px-2">
+                        <div class="text-slate-200">${apt.service}</div>
+                        <div class="text-xs font-bold text-cyan-400">${apt.price.toLocaleString('tr-TR')} ₺</div>
+                    </td>
+                    <td class="py-3.5 px-2 text-slate-300">
+                        ${apt.date} • <span class="font-bold text-white">${apt.time}</span>
+                    </td>
+                    <td class="py-3.5 px-2">
+                        <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold ${statusBadge}">
+                            ● ${apt.status}
+                        </span>
+                    </td>
+                    <td class="py-3.5 px-2 text-right whitespace-nowrap space-x-1.5">
+                        <button onclick="sendReminderForAppointment('${apt.id}')" class="px-2.5 py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 text-xs font-semibold" title="WhatsApp Hatırlatması Gönder">
+                            WhatsApp
+                        </button>
+                        <button onclick="toggleAppointmentStatus('${apt.id}')" class="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-xs text-slate-200 font-semibold">
+                            ${apt.status === 'Onaylandı' ? 'İptal Et' : 'Onayla'}
+                        </button>
+                        <button onclick="deleteAppointment('${apt.id}')" class="px-2 py-1 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 text-xs font-bold" title="Sil">
+                            Sil
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }
+
+        function toggleAppointmentStatus(id) {
+            state.appointments = state.appointments.map(item => {
+                if (item.id === id) {
+                    const nextStatus = item.status === 'Onaylandı' ? 'İptal Edildi' : 'Onaylandı';
+                    showToast(`${id} kodlu randevu durumu "${nextStatus}" olarak güncellendi.`);
+                    return { ...item, status: nextStatus };
+                }
+                return item;
+            });
+            renderAllAppointmentTables();
+        }
+
+        function deleteAppointment(id) {
+            state.appointments = state.appointments.filter(item => item.id !== id);
+            renderAllAppointmentTables();
+            showToast(`${id} kodlu randevu kaydı silindi.`);
+        }
+
+        function sendReminderForAppointment(id) {
+            const apt = state.appointments.find(a => a.id === id);
+            if (!apt) return;
+            showWhatsappPopup({
+                business: apt.tenant,
+                customer: apt.customer,
+                service: apt.service,
+                date: apt.date,
+                time: apt.time,
+                phone: apt.phone
+            });
+            showToast(`${apt.customer} adlı müşteriye WhatsApp hatırlatma bildirimi gönderildi!`);
+        }
+
+        // Dashboard Alt Sekmeleri
+        function switchDashboardSubTab(subTab) {
+            state.dashboardSubTab = subTab;
+            const tabs = ['overview', 'tenants', 'whatsapp', 'services'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`dashTabBtn-${t}`);
+                const panel = document.getElementById(`dashSubTab-${t}`);
+                if (t === subTab) {
+                    panel.classList.remove('hidden');
+                    btn.className = 'flex-1 sm:flex-initial px-5 py-3 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow';
+                } else {
+                    panel.classList.add('hidden');
+                    btn.className = 'flex-1 sm:flex-initial px-5 py-3 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 text-slate-400 hover:text-white';
+                }
+            });
+            lucide.createIcons();
+        }
+
+        // Yeni İşletme (Tenant) Ekleme ve Listeleme
+        function renderTenantsTable() {
+            const tbody = document.getElementById('tenantsTableBody');
+            const totalMrr = state.tenants.reduce((acc, t) => acc + t.mrr, 0);
+            document.getElementById('totalMrrBadge').textContent = `Toplam MRR: ${totalMrr.toLocaleString('tr-TR')} ₺/ay`;
+
+            tbody.innerHTML = state.tenants.map(t => `
+                <tr class="hover:bg-white/[0.02]">
+                    <td class="py-3.5 px-2 font-bold text-white">${t.name}</td>
+                    <td class="py-3.5 px-2 font-mono text-xs text-cyan-400">flowsoft.com/${t.slug}</td>
+                    <td class="py-3.5 px-2 text-purple-300 font-semibold">${t.plan}</td>
+                    <td class="py-3.5 px-2 font-bold text-white">${t.mrr.toLocaleString('tr-TR')} ₺/ay</td>
+                    <td class="py-3.5 px-2 text-right space-x-2">
+                        <button onclick="activateTenant('${t.id}')" class="px-3 py-1 rounded-lg bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-300 text-xs font-bold">
+                            Yönet
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function handleAddTenant(e) {
+            e.preventDefault();
+            const input = document.getElementById('newTenantNameInput');
+            const planSelect = document.getElementById('newTenantPlanSelect').value.split('|');
+            const name = input.value.trim();
+            if (!name) return;
+
+            const slug = createSlug(name);
+            const newTenant = {
+                id: 't-' + Date.now(),
+                name: name,
+                slug: slug,
+                plan: planSelect[0],
+                mrr: Number(planSelect[1]),
+                status: 'Aktif'
+            };
+
+            state.tenants.unshift(newTenant);
+            state.activeBusinessName = name;
+            state.activeBusinessSlug = slug;
+            state.activePlanName = planSelect[0] + ' Paket';
+            input.value = '';
+
+            renderTenantsTable();
+            renderDashboardHeader();
+            showToast(`${name} şubesi ve flowsoft.com/${slug} adresi başarıyla aktif edildi!`);
+        }
+
+        function activateTenant(id) {
+            const found = state.tenants.find(t => t.id === id);
+            if (!found) return;
+            state.activeBusinessName = found.name;
+            state.activeBusinessSlug = found.slug;
+            state.activePlanName = found.plan + ' Paket';
+            renderDashboardHeader();
+            switchDashboardSubTab('overview');
+            showToast(`Aktif yönetim paneli "${found.name}" olarak değiştirildi.`);
+        }
+
+        // WhatsApp Şablon Değişken Ekleme ve Test
+        function insertTemplateVar(variable) {
+            const textarea = document.getElementById('whatsappTemplateInput');
+            textarea.value += ' ' + variable;
+            textarea.focus();
+        }
+
+        function triggerCustomTemplatePreview() {
+            const raw = document.getElementById('whatsappTemplateInput').value;
+            const preset = BUSINESS_PRESETS[state.selectedPresetIndex];
+            const sampleService = preset.services[0]?.title || 'VIP Hizmet';
+
+            const compiled = raw
+                .replace(/\{musteri_adi\}/g, 'Emirhan Yılmaz')
+                .replace(/\{isletme_adi\}/g, state.activeBusinessName)
+                .replace(/\{hizmet\}/g, sampleService)
+                .replace(/\{tarih_saat\}/g, 'Yarın saat 14:30');
+
+            showWhatsappPopup({
+                business: state.activeBusinessName,
+                customer: 'Emirhan Yılmaz',
+                service: sampleService,
+                date: 'Yarın',
+                time: '14:30',
+                phone: '0532 480 90 10',
+                customBody: compiled
+            });
+            showToast('Özel WhatsApp şablonunuz canlı olarak test edildi!');
+        }
+
+        // Hizmetler Sekmesi Yönetimi
+        function renderDashboardServices() {
+            const preset = BUSINESS_PRESETS[state.selectedPresetIndex];
+            const list = document.getElementById('dashServicesList');
+            list.innerHTML = preset.services.map((srv, idx) => `
+                <div class="flex items-center justify-between p-4 rounded-2xl bg-[#06060c] border border-white/10">
+                    <div>
+                        <div class="font-bold text-sm text-white">${srv.title}</div>
+                        <div class="text-xs text-slate-400 mt-0.5">Süre: ${srv.duration}</div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="text-sm font-black text-cyan-400">${srv.price.toLocaleString('tr-TR')} ₺</span>
+                        <button onclick="removeService(${idx})" class="px-2.5 py-1 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 text-xs font-bold">
+                            Kaldır
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function handleAddService(e) {
+            e.preventDefault();
+            const title = document.getElementById('newServiceTitle').value.trim();
+            const duration = document.getElementById('newServiceDuration').value.trim();
+            const price = Number(document.getElementById('newServicePrice').value);
+            if (!title || !price) return;
+
+            BUSINESS_PRESETS[state.selectedPresetIndex].services.push({
+                id: 'srv-' + Date.now(),
+                title,
+                duration,
+                price
+            });
+
+            document.getElementById('newServiceTitle').value = '';
+            document.getElementById('newServiceDuration').value = '';
+            document.getElementById('newServicePrice').value = '';
+
+            renderDashboardServices();
+            renderSimulatorBookingForm();
+            showToast(`"${title}" hizmeti randevu sayfasına eklendi!`);
+        }
+
+        function removeService(idx) {
+            const services = BUSINESS_PRESETS[state.selectedPresetIndex].services;
+            if (services.length <= 1) {
+                showToast('En az 1 aktif hizmet bulunmalıdır.', 'info');
+                return;
+            }
+            services.splice(idx, 1);
+            state.selectedServiceIndex = 0;
+            renderDashboardServices();
+            renderSimulatorBookingForm();
+            showToast('Hizmet listeden kaldırıldı.');
+        }
+
+        // Dashboard Manuel Yeni Randevu Modalı
+        function openNewAppointmentModal() {
+            const preset = BUSINESS_PRESETS[state.selectedPresetIndex];
+            const select = document.getElementById('modalServiceSelect');
+            select.innerHTML = preset.services.map((s, idx) => `<option value="${idx}">${s.title} (${s.price} ₺)</option>`).join('');
+            document.getElementById('newAppointmentModal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeNewAppointmentModal() {
+            document.getElementById('newAppointmentModal').classList.add('hidden');
+        }
+
+        function handleDashboardNewAppointment(e) {
+            e.preventDefault();
+            const preset = BUSINESS_PRESETS[state.selectedPresetIndex];
+            const srvIdx = Number(document.getElementById('modalServiceSelect').value) || 0;
+            const chosen = preset.services[srvIdx] || preset.services[0];
+            const customer = document.getElementById('modalCustName').value.trim();
+            const phone = document.getElementById('modalCustPhone').value.trim();
+            const date = document.getElementById('modalDateSelect').value;
+            const time = document.getElementById('modalTimeSelect').value;
+
+            const newRec = {
+                id: 'FS-' + Math.floor(1000 + Math.random() * 9000),
+                tenant: state.activeBusinessName,
+                slug: state.activeBusinessSlug,
+                customer,
+                phone,
+                service: chosen.title,
+                price: chosen.price,
+                date,
+                time,
+                status: 'Onaylandı'
+            };
+
+            state.appointments.unshift(newRec);
+            renderAllAppointmentTables();
+            closeNewAppointmentModal();
+            showWhatsappPopup({
+                business: newRec.tenant,
+                customer: newRec.customer,
+                service: newRec.service,
+                date: newRec.date,
+                time: newRec.time,
+                phone: newRec.phone
+            });
+            showToast(`Randevu kaydedildi ve ${customer} adlı müşteriye WhatsApp onayı gönderildi!`);
+        }
+
+        // 7. ROI KAZANÇ HESAPLAYICI
+        function updateRoiCalculator() {
+            const daily = Number(document.getElementById('roiDailySlider').value);
+            const price = Number(document.getElementById('roiPriceSlider').value);
+
+            document.getElementById('roiDailyLabel').textContent = `${daily} Randevu / Gün`;
+            document.getElementById('roiPriceLabel').textContent = `${price.toLocaleString('tr-TR')} ₺`;
+
+            const savedHours = Math.round((daily * 3.5 * 30) / 60);
+            const preventedCount = Math.max(2, Math.round(daily * 30 * 0.12));
+            const extraRevenue = preventedCount * price;
+
+            document.getElementById('roiExtraRevenue').textContent = `+${extraRevenue.toLocaleString('tr-TR')} ₺`;
+            document.getElementById('roiPreventedCount').textContent = `Ayda ~${preventedCount} unutulan randevu kurtarılır`;
+            document.getElementById('roiSavedHours').textContent = `${savedHours} Saat / Ay`;
+        }
+
+        // 8. FİYATLANDIRMA VE PAKET SEÇİMİ
+        function toggleBillingCycle(isYearly) {
+            state.isYearlyBilling = isYearly;
+            const mBtn = document.getElementById('billingMonthlyBtn');
+            const yBtn = document.getElementById('billingYearlyBtn');
+
+            if (isYearly) {
+                yBtn.className = 'px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 bg-gradient-to-r from-purple-600 to-cyan-500 text-white';
+                mBtn.className = 'px-4 py-2 rounded-xl text-xs font-bold transition-all text-slate-400';
+            } else {
+                mBtn.className = 'px-4 py-2 rounded-xl text-xs font-bold transition-all bg-purple-600 text-white';
+                yBtn.className = 'px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 text-slate-400';
+            }
+            renderPricingCards();
+        }
+
+        function renderPricingCards() {
+            const plans = [
+                {
+                    name: 'Başlangıç (Esnaf & Stüdyo)',
+                    desc: 'Bireysel çalışan profesyoneller, kuaförler ve butik stüdyolar için.',
+                    price: state.isYearlyBilling ? 890 : 1090,
+                    features: [
+                        'Size Özel Randevu Sayfası (flowsoft.com/adiniz)',
+                        'Aylık 300 Online Randevu Kapasitesi',
+                        'Otomatik WhatsApp Onay Bildirimleri',
+                        'Mobil Uyumlu Takvim & Müşteri Kaydı'
+                    ],
+                    popular: false
+                },
+                {
+                    name: 'Profesyonel (Tam Otomasyon)',
+                    desc: 'Yoğun çalışan klinikler, güzellik merkezleri ve büyüyen işletmeler için.',
+                    price: state.isYearlyBilling ? 1490 : 1850,
+                    features: [
+                        'Sınırsız Online Randevu & Müşteri Kaydı',
+                        '7/24 WhatsApp Onay & Randevu Hatırlatıcıları',
+                        'Personel ve Koltuk Bazlı Takvim Yönetimi',
+                        'Detaylı Ciro, Gelir ve Analitik Raporları'
+                    ],
+                    popular: true
+                },
+                {
+                    name: 'Kurumsal (Özel Entegrasyon)',
+                    desc: 'Çok şubeli markalar, hastaneler ve özel otomasyon isteyen firmalar için.',
+                    price: state.isYearlyBilling ? 2990 : 3690,
+                    features: [
+                        'Kendi Domain Adresinizle (www.firmaniz.com) Kullanım',
+                        'Çoklu Şube ve Sınırsız Personel Yönetimi',
+                        'Özel CRM, Muhasebe ve Ödeme Entegrasyonu',
+                        '7/24 Öncelikli VIP Müşteri Temsilcisi'
+                    ],
+                    popular: false
+                }
+            ];
+
+            const container = document.getElementById('pricingCardsContainer');
+            container.innerHTML = plans.map(plan => {
+                const cardCls = plan.popular
+                    ? 'bg-gradient-to-b from-[#13132b] to-[#0a0a16] border-cyan-400 shadow-[0_0_40px_rgba(6,182,212,0.2)] md:-translate-y-3'
+                    : 'bg-[#0b0b14] border-white/10';
+                const btnCls = plan.popular
+                    ? 'bg-gradient-to-r from-purple-600 to-cyan-500 text-white shadow-lg'
+                    : 'bg-white/10 hover:bg-white/15 text-white';
+
+                return `
+                    <div class="relative rounded-3xl p-8 flex flex-col justify-between border transition-all ${cardCls}">
+                        ${plan.popular ? `<div class="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-to-r from-purple-500 to-cyan-400 text-black font-black text-[11px] uppercase tracking-wider">En Çok Tercih Edilen</div>` : ''}
+                        <div>
+                            <h3 class="text-xl font-black text-white">${plan.name}</h3>
+                            <p class="text-xs text-slate-400 mt-2 min-h-[36px]">${plan.desc}</p>
+                            <div class="my-6">
+                                <span class="text-4xl font-black text-white">${plan.price.toLocaleString('tr-TR')} ₺</span>
+                                <span class="text-xs text-slate-400"> / ay</span>
+                            </div>
+                            <ul class="space-y-3 text-xs sm:text-sm text-slate-300 mb-8">
+                                ${plan.features.map(f => `
+                                    <li class="flex items-center gap-2.5">
+                                        <span class="text-cyan-400 font-bold">✓</span>
+                                        <span>${f}</span>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                        <button onclick="selectPricingPlan('${plan.name}')" class="w-full py-3.5 rounded-xl font-bold text-sm transition-all ${btnCls}">
+                            14 Gün Ücretsiz Başla
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function selectPricingPlan(planName) {
+            state.activePlanName = planName;
+            openAuthModal('register');
+            showToast(`${planName} seçildi! İşletme adınızı girerek 14 günlük ücretsiz denemenizi başlatın.`);
+        }
+
+        // 9. SIKÇA SORULAN SORULAR (AKORDEON)
+        function renderFaqAccordion() {
+            const container = document.getElementById('faqAccordionContainer');
+            container.innerHTML = FAQ_ITEMS.map((item, idx) => {
+                const isOpen = state.openFaqIndex === idx;
+                return `
+                    <div class="bg-[#0b0b14] border border-white/10 rounded-2xl overflow-hidden">
+                        <button onclick="toggleFaqItem(${idx})" class="w-full px-6 py-5 text-left flex items-center justify-between gap-4 font-bold text-sm sm:text-base text-white hover:text-cyan-300 transition-colors">
+                            <span>${item.q}</span>
+                            <span class="text-purple-400 font-mono text-lg">${isOpen ? '−' : '+'}</span>
+                        </button>
+                        ${isOpen ? `<div class="px-6 pb-5 text-xs sm:text-sm text-slate-300 leading-relaxed border-t border-white/5 pt-4">${item.a}</div>` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function toggleFaqItem(idx) {
+            state.openFaqIndex = state.openFaqIndex === idx ? -1 : idx;
+            renderFaqAccordion();
+        }
+
+        // 10. İLETİŞİM MODALI
+        function openContactModal() {
+            document.getElementById('contactModal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeContactModal() {
+            document.getElementById('contactModal').classList.add('hidden');
+        }
+
+        function handleContactSubmit(e) {
+            e.preventDefault();
+            const bName = document.getElementById('contactBusinessName').value.trim();
+            closeContactModal();
+            showToast(`Talebiniz alındı (${bName})! Uzman ekibimiz WhatsApp üzerinden sizinle iletişime geçecektir.`);
+        }
+
+        // SAYFA YÜKLENDİĞİNDE BAŞLAT
+        window.addEventListener('DOMContentLoaded', () => {
+            renderSimulatorPresets();
+            renderSimulatorBookingForm();
+            renderAllAppointmentTables();
+            renderPipelineSteps();
+            updateRoiCalculator();
+            renderPricingCards();
+            renderFaqAccordion();
+            renderTenantsTable();
+            renderDashboardServices();
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>
